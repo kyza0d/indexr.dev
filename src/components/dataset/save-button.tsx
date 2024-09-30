@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Bookmark, BookmarkCheck } from 'lucide-react'
@@ -11,7 +9,7 @@ interface SaveDatasetButtonProps {
   onSaveToggle: (isSaved: boolean) => Promise<void>
 }
 
-export function SaveDatasetButton({ datasetId, isSaved, onSaveToggle }: SaveDatasetButtonProps) {
+export function SaveDatasetButton({ isSaved, onSaveToggle }: SaveDatasetButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 

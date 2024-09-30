@@ -21,7 +21,7 @@ interface TreeContextType {
 
 const TreeContext = createContext<TreeContextType | undefined>(undefined);
 
-export const TreeProvider: React.FC<{ children: React.ReactNode, currentView: 'tree' | 'grid' }> = ({ children, currentView }) => {
+export const TreeProvider: React.FC<{ children: React.ReactNode, currentView: 'tree' | 'grid' }> = ({ children }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -72,6 +72,7 @@ export const TreeProvider: React.FC<{ children: React.ReactNode, currentView: 't
       highlightedNode,
       setHighlightedNode,
       isScrolling,
+      currentView: 'tree',
       setIsScrolling,
       virtualListRef,
       nodeIndexMap,

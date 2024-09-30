@@ -9,20 +9,25 @@ import { DatasetCard } from '@/components/dataset/dataset-card'
 import { Filters } from '@/components/dataset/filters'
 import { useDatasetSearch } from './dataset-search-context'
 import { useDatasets } from '@/hooks/use-datasets'
+import { useSession } from 'next-auth/react'
 
 export function DatasetListClient() {
   const router = useRouter()
   const { query, tags } = useDatasetSearch()
   const [page, setPage] = useState(1)
-  const { datasets, isLoading, error, totalPages, totalCount } = useDatasets(query, tags, page)
+  const { datasets, isLoading, error, totalPages } = useDatasets(query, tags, page)
+  const { data: session } = useSession()
 
   useEffect(() => {
     setPage(1)
   }, [query, tags])
 
-  const handleView = useCallback((id: string) => {
-    router.push(`/explore/${id}`)
-  }, [router])
+  const handleView = useCallback(
+    (id: string) => {
+      router.push(`/explore/${id}`)
+    },
+    [router]
+  )
 
   if (isLoading) {
     return (
@@ -45,7 +50,7 @@ export function DatasetListClient() {
       <div className="mx-auto py-8">
         <h1 className="text-3xl font-bold mb-8">Datasets</h1>
 
-        <Filters totalCount={totalCount} />
+        <Filters />
 
         {datasets.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
@@ -53,13 +58,19 @@ export function DatasetListClient() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {datasets.map((dataset) => (
-              <DatasetCard
-                key={dataset.id}
-                dataset={dataset}
-                onView={handleView}
-              />
-            ))}
+            {datasets.map((dataset) => {
+              const isOwner = session?.user?.id === dataset.id
+              return (
+                <DatasetCard
+                  key={dataset.id}
+                  dataset={dataset}
+                  isOwner={isOwner}
+                  savingId={null}
+                  deletingId={null}
+                  onView={handleView}
+                />
+              )
+            })}
           </div>
         )}
         <div className="mt-8">

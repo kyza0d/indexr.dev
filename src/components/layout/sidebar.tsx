@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -49,7 +47,7 @@ export function Sidebar({ isExpanded, onToggle }: SidebarProps) {
           {isExpanded && (
             <div className="py-2">
               <ScrollArea>
-                <RecentDatasets initialDataset={{ id: "", name: "", fileType: "", updatedAt: "", isPublic: false }} />
+                <RecentDatasets />
               </ScrollArea>
             </div>
           )}

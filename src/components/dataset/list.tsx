@@ -1,10 +1,8 @@
-import { fetchDatasets, deleteDataset, saveDataset } from '@/actions/dataset'
+import { fetchDatasets } from '@/actions/dataset'
 import { DatasetListClient } from '@/components/dataset/list-client'
-import { auth } from '@/auth'
 
 export async function DatasetList() {
-  const { datasets, error, totalPages } = await fetchDatasets()
-  const session = await auth()
+  const { error } = await fetchDatasets()
 
   if (error) {
     console.error('Error fetching datasets:', error)
@@ -12,12 +10,6 @@ export async function DatasetList() {
   }
 
   return (
-    <DatasetListClient
-      initialDatasets={datasets}
-      initialTotalPages={totalPages}
-      deleteDataset={deleteDataset}
-      saveDataset={saveDataset}
-      currentUserId={session?.user?.id}
-    />
+    <DatasetListClient />
   )
 }

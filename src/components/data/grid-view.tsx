@@ -1,13 +1,21 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { TableVirtuoso } from 'react-virtuoso';
 import { useGridContext } from './grid-context';
-import { inferColumnTypes } from '@/lib/type-inference';
-import { ColumnData } from '@/types';
+import { inferColumnTypes, InferredType } from '@/lib/type-inference';
 import { getIcon } from '@/lib/type-icon';
 import { GoTriangleUp, GoTriangleDown } from 'react-icons/go';
 
 interface GridItem {
   [key: string]: string | number | boolean | null;
+}
+
+type GridDataItem = GridItem & { originalIndex: number };
+
+interface ColumnData {
+  values: string[];
+  type: InferredType;
+  path: string[];
+  width: number;
 }
 
 interface GridViewProps {
@@ -30,7 +38,10 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
 
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
 
-  const initialData = useMemo(() => data.map((item, index) => ({ ...item, originalIndex: index })), [data]);
+  const initialData: GridDataItem[] = useMemo(
+    () => data.map((item, index) => ({ ...item, originalIndex: index })),
+    [data]
+  );
 
   const sortedData = useMemo(() => {
     if (sortConfig.key && sortConfig.direction && sortConfig.key !== 'rowIndex') {
@@ -124,7 +135,7 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
  * @returns An object containing columns, headers, rowCount, and totalWidth.
  */
 const useGridData = (
-  data: GridItem[],
+  data: GridDataItem[],
   columnWidths: Record<string, number>
 ) => {
   return useMemo(() => {
@@ -161,7 +172,7 @@ const useGridData = (
         const sampleValues = column.values.slice(0, SAMPLE_SIZE);
         const maxLength = Math.max(
           key.length,
-          ...sampleValues.map((v) => v.length)
+          ...sampleValues.map((v) => String(v ?? '').length)
         );
         column.width = columnWidths[key] || Math.max(
           maxLength * CHAR_WIDTH + PADDING,
@@ -173,7 +184,7 @@ const useGridData = (
 
     return {
       columns,
-      headers: ['rowIndex', ...Object.keys(data[0]).filter(key => key !== 'originalIndex')], // Exclude originalIndex from headers
+      headers: ['rowIndex', ...Object.keys(data[0]).filter(key => key !== 'originalIndex')],
       rowCount: data.length,
       totalWidth,
     };
@@ -203,7 +214,7 @@ const useRenderRow = (
         {headers.map((header, cellIndex) =>
           renderCell(
             header,
-            columns[header].values[rowIndex] || '',
+            String(columns[header].values[rowIndex] ?? ''),
             rowIndex,
             cellIndex
           )

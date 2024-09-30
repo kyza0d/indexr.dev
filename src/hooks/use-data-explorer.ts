@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { IndexItem, TreeNode, GridItem, Dataset, ExampleDataset } from '@/types';
+import { IndexItem, Dataset, ExampleDataset } from '@/types';
 import { buildTreeData, buildGridData, countTotalItems } from '@/lib/data-processing';
 import { createSearchFunction } from '@/lib/search';
 
@@ -21,6 +21,9 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
       let rawDataContent: string;
 
       if ('getData' in dataset) {
+        if (!dataset.getData) {
+          throw new Error('Dataset does not have a getData function');
+        }
         normalizedData = await dataset.getData();
         rawDataContent = JSON.stringify(normalizedData, null, 2);
       } else {
@@ -60,7 +63,7 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
 
   const searchResults = useMemo(() => {
     const results = searchFunction(searchTerm);
-    return results.map((result, index) => {
+    return results.map((result) => {
       const originalIndex = result.path[1] ? parseInt(result.path[1].replace(/[^\d]/g, ''), 10) : undefined;
       console.log('Search result:', { result, originalIndex, path: result.path });
       return {
@@ -79,25 +82,6 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
     });
   }, []);
 
-  const refetchDataset = useCallback(async (datasetId: string) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`/api/datasets/${datasetId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch updated dataset')
-      }
-      const updatedDataset = await response.json()
-      setDataset(updatedDataset)
-      await fetchData(updatedDataset)
-    } catch (err) {
-      console.error('Error refetching dataset:', err)
-      setError((err as Error).message)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchData])
-
   return {
     isLoading,
     error,
@@ -110,6 +94,5 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
     rawData,
     totalItems,
     updateSavedStatus,
-    refetchDataset,
   };
 }

@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { FolderTree, Table, FileIcon } from 'lucide-react';
+import { FolderTree, FileIcon } from 'lucide-react';
 import { Bookmark } from 'lucide-react';
 
 export function DataExplorerSkeleton() {

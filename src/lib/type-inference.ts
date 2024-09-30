@@ -59,7 +59,9 @@ export const inferColumnTypes = (data: any[][]): InferredType[] => {
   if (data.length === 0 || data[0].length === 0) return [];
 
   const columnCount = data[0].length;
-  const typeCounts: { [key in InferredType]: number }[] = Array(columnCount).fill(null).map(() => ({}));
+  const typeCounts: Array<{ [key in InferredType]?: number }> = Array(columnCount)
+    .fill(null)
+    .map(() => ({}));
 
   for (let row = 0; row < data.length; row++) {
     for (let col = 0; col < columnCount; col++) {
@@ -68,21 +70,19 @@ export const inferColumnTypes = (data: any[][]): InferredType[] => {
     }
   }
 
-  return typeCounts.map(counts => {
+  return typeCounts.map((counts) => {
     const sortedTypes = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    return sortedTypes.length > 0 ? sortedTypes[0][0] as InferredType : 'unknown';
+    return sortedTypes.length > 0 ? (sortedTypes[0][0] as InferredType) : 'unknown';
   });
 };
 
-export interface TypeInfo {
-  [key: string]: InferredType | TypeInfo;
-}
+export type TypeInfo = InferredType | { [key: string]: TypeInfo };
 
 export function inferDataTypes(data: JsonValue): TypeInfo {
   if (Array.isArray(data)) {
     return { type: 'array', items: inferDataTypes(data[0]) };
   } else if (typeof data === 'object' && data !== null) {
-    const result: TypeInfo = {};
+    const result: { [key: string]: TypeInfo } = {};
     for (const [key, value] of Object.entries(data)) {
       result[key] = inferDataTypes(value);
     }
@@ -93,15 +93,17 @@ export function inferDataTypes(data: JsonValue): TypeInfo {
 }
 
 export function getTypeFromPath(typeInfo: TypeInfo, path: string[]): InferredType {
-  let current: TypeInfo | InferredType = typeInfo;
+  let current: TypeInfo = typeInfo;
   for (const segment of path) {
     if (typeof current === 'string') {
       return current;
     }
-    if (current.type === 'array') {
+    if (current.type === 'array' && 'items' in current) {
       current = current.items;
+    } else if (typeof current === 'object' && segment in current) {
+      current = current[segment];
     } else {
-      current = current[segment] || 'unknown';
+      return 'unknown';
     }
   }
   return typeof current === 'string' ? current : 'object';

@@ -1,7 +1,5 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,13 +7,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { FileIcon, Globe, UploadIcon, XIcon, Lock } from 'lucide-react'
-import { useToast } from "@/hooks/use-toast"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { useToast } from '@/hooks/use-toast'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,45 +31,59 @@ import { useSession } from 'next-auth/react'
 const FormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  file: z.custom<File>((val) => val instanceof File, { message: "Please select a file" }),
+  file: z
+    .custom<File | null>(
+      (val) => val instanceof File || val === null,
+      { message: 'Please select a file' }
+    )
+    .nullable(),
   tags: z.array(z.string()),
   isPublic: z.boolean().default(false),
 })
 
 interface UploadDatasetDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onUploadSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onUploadSuccess: () => void
 }
 
-const CustomTagInput = ({ value, onChange }: { value: string[], onChange: (value: string[]) => void }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [tags, setTags] = useState(value);
+const CustomTagInput = ({
+  value,
+  onChange,
+}: {
+  value: string[]
+  onChange: (value: string[]) => void
+}) => {
+  const [inputValue, setInputValue] = useState('')
+  const [tags, setTags] = useState(value)
 
   useEffect(() => {
-    setTags(value);
-  }, [value]);
+    setTags(value)
+  }, [value])
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && inputValue) {
-      event.preventDefault();
-      const newTags = [...tags, inputValue];
-      setTags(newTags);
-      onChange(newTags);
-      setInputValue('');
+      event.preventDefault()
+      const newTags = [...tags, inputValue]
+      setTags(newTags)
+      onChange(newTags)
+      setInputValue('')
     }
-  };
+  }
 
   const removeTag = (tagToRemove: string) => {
-    const newTags = tags.filter(tag => tag !== tagToRemove);
-    setTags(newTags);
-    onChange(newTags);
-  };
+    const newTags = tags.filter((tag) => tag !== tagToRemove)
+    setTags(newTags)
+    onChange(newTags)
+  }
 
   return (
     <div className="flex flex-wrap gap-2 border rounded-md p-2">
       {tags.map((tag, index) => (
-        <div key={index} className="h-10 inline-flex items-center bg-secondary text-secondary-foreground px-2 py-1 rounded-md">
+        <div
+          key={index}
+          className="h-10 inline-flex items-center bg-secondary text-secondary-foreground px-2 py-1 rounded-md"
+        >
           {tag}
           <button type="button" onClick={() => removeTag(tag)} className="ml-2">
             <XIcon size={16} />
@@ -79,16 +99,21 @@ const CustomTagInput = ({ value, onChange }: { value: string[], onChange: (value
         placeholder="Add a tag..."
       />
     </div>
-  );
-};
+  )
+}
 
-export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: UploadDatasetDialogProps) {
+export function UploadDatasetDialog({
+  open,
+  onOpenChange,
+  onUploadSuccess,
+}: UploadDatasetDialogProps) {
   const { data: session } = useSession()
   const [isUploading, setIsUploading] = useState(false)
   const { toast } = useToast()
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-  const [fileContent, setFileContent] = useState<string>('');
-  const [fileType, setFileType] = useState<string>('');
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
+  const [fileContent, setFileContent] = useState<string>('')
+
+  const [triggerTagGeneration, setTriggerTagGeneration] = useState(false)
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -96,7 +121,7 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
       name: '',
       description: '',
       tags: [],
-      file: undefined,
+      file: null,
       isPublic: session?.user?.publicByDefault || false,
     },
   })
@@ -104,7 +129,9 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsUploading(true)
     const formData = new FormData()
-    formData.append('file', data.file)
+    if (data.file) {
+      formData.append('file', data.file)
+    }
     formData.append('name', data.name)
     formData.append('description', data.description || '')
     formData.append('tags', JSON.stringify(data.tags))
@@ -120,74 +147,69 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
         throw new Error('Upload failed')
       }
 
-      const result = await response.json()
+      // Optionally use the result
+      // const result = await response.json()
+
+      await response.json() // Consume the response body
       toast({
-        title: "Success",
-        description: "Dataset uploaded successfully.",
+        title: 'Success',
+        description: 'Dataset uploaded successfully.',
       })
       onOpenChange(false)
       onUploadSuccess()
-
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to upload dataset. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to upload dataset. Please try again.',
+        variant: 'destructive',
       })
     } finally {
       setIsUploading(false)
     }
   }
 
-  const [triggerTagGeneration, setTriggerTagGeneration] = useState(false);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0] || null
+    form.setValue('file', file)
     if (file) {
-      form.setValue('file', file as File);
-      setSelectedFileName(file.name);
+      setSelectedFileName(file.name)
 
       // Read file content
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (event) => {
-        const content = event.target?.result as string;
-        setFileContent(content);
-
-        // Set file type
-        const fileType = file.name.split('.').pop();
-        if (fileType) {
-          setFileType(fileType);
-        }
+        const content = event.target?.result as string
+        setFileContent(content)
 
         // Trigger tag generation if autoTag is enabled
         if (session?.user?.autoTag) {
-          setTriggerTagGeneration(true);
+          setTriggerTagGeneration(true)
         }
-      };
-      reader.readAsText(file);
+      }
+      reader.readAsText(file)
     } else {
-      form.setValue('file', undefined);
-      setSelectedFileName(null);
-      setFileContent('');
-      setTriggerTagGeneration(false);
+      setSelectedFileName(null)
+      setFileContent('')
+      setTriggerTagGeneration(false)
     }
-  };
+  }
 
   const clearFileSelection = (e: React.MouseEvent) => {
-    e.preventDefault();
-    form.setValue('file', undefined);
-    setSelectedFileName(null);
-  };
+    e.preventDefault()
+    form.setValue('file', null)
+    setSelectedFileName(null)
+    setFileContent('')
+    setTriggerTagGeneration(false)
+  }
 
   const handleFileButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    document.getElementById('file-upload')?.click();
-  };
+    e.preventDefault()
+    document.getElementById('file-upload')?.click()
+  }
 
   const handleTagsGenerated = (tags: string[]) => {
-    form.setValue('tags', tags);
-    setTriggerTagGeneration(false);
-  };
+    form.setValue('tags', tags)
+    setTriggerTagGeneration(false)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -262,7 +284,9 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
                       )}
                     </div>
                   </FormControl>
-                  <FormDescription className="text-xs text-muted-foreground">.csv, .json</FormDescription>
+                  <FormDescription className="text-xs text-muted-foreground">
+                    .csv, .json
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -274,12 +298,11 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <CustomTagInput
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
+                    <CustomTagInput value={field.value} onChange={field.onChange} />
                   </FormControl>
-                  <FormDescription>Add relevant tags to your dataset</FormDescription>
+                  <FormDescription>
+                    Add relevant tags to your dataset
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -313,10 +336,7 @@ export function UploadDatasetDialog({ open, onOpenChange, onUploadSuccess }: Upl
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}

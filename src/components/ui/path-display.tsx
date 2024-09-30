@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, FileIcon, FolderIcon } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { InferredType } from '@/lib/type-inference';
 import { Highlight } from '@/components/ui/highlight';
 import { getIcon } from '@/lib/type-icon';

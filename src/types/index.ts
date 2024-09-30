@@ -1,4 +1,4 @@
-import { InferredType } from '@/utils/type-inference';
+import { InferredType } from '@/lib/type-inference';
 
 export type JsonValue = "object" | "array" | string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -50,16 +50,21 @@ export interface ColumnData {
 export interface Dataset {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   fileType: string;
-  data: IndexItem[];
-  getData: () => Promise<IndexItem[]>;
-  rawData: JsonValue | string;
   fileUrl: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
   isPublic: boolean;
+  isSaved: boolean;
+  userId: string;
+  userName?: string;
+  createdAt: string;
+  updatedAt: string;
+  itemCount: number;
+  tags: { id: string; name: string }[];
+  user?: { name: string | null; image: string | null };
+  data?: any;
+  getData?: () => any;
+  rawData?: string;
 }
 
 export interface ExampleDataset {

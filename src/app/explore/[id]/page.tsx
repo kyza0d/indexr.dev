@@ -1,5 +1,3 @@
-// src/app/explore/[datasetId]/page.tsx
-
 import { Suspense } from 'react'
 import { DataExplorer } from '@/components/data/explorer'
 import { DataExplorerSkeleton } from '@/components/data/explorer-skeleton'

@@ -1,9 +1,7 @@
-'use client'
-
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
-import { Menu, Upload, Search, Info } from 'lucide-react'
+import { Menu, Upload, Search } from 'lucide-react'
 import UserMenu from '@/components/layout/user-menu'
 import { UploadDatasetDialog } from '@/components/dataset/upload-dialog'
 import { useRouter } from 'next/navigation'

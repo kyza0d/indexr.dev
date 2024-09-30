@@ -129,25 +129,6 @@ export async function fetchDatasets() {
   }
 }
 
-export async function updateDataset(id: string, data: any[]) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
-
-  try {
-    await prisma.dataset.update({
-      where: { id, userId: session.user.id },
-      data: { rows: data },
-    })
-    revalidatePath(`/explore?datasetId=${id}`)
-    return { success: true }
-  } catch (error) {
-    console.error('Error updating dataset:', error)
-    return { success: false, error: 'Failed to update dataset' }
-  }
-}
-
 export async function saveDataset(id: string, isSaved: boolean) {
   const session = await auth()
   if (!session?.user?.id) {

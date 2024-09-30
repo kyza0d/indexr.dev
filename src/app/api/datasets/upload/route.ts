@@ -18,7 +18,7 @@ const UploadSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session || !session.user) {
+  if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         fileType: validatedData.file.type,
         fileUrl: blob.url,
         isPublic: validatedData.isPublic,
-        userId: session.user.id,
+        userId: session.user.id, // This is now guaranteed to be defined
         tags: {
           connectOrCreate: validatedData.tags.map(tag => ({
             where: { name: tag },

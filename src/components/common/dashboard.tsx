@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { SearchBar } from '@/components/search/search-bar'
-import { Button } from "@/components/ui/button"
-import { Loader2, Globe, Lock, Plus, FileUp, BarChart2, Database } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import { Pagination } from '@/components/ui/pagination'
-import { useToast } from "@/hooks/use-toast"
-import { useSession } from "next-auth/react"
+import { useToast } from '@/hooks/use-toast'
+import { useSession } from 'next-auth/react'
 import { DatasetCard } from '../dataset/dataset-card'
 import { useRouter } from 'next/navigation'
 
@@ -36,104 +34,120 @@ export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
+  const fetchDatasets = useCallback(
+    async (page: number, query: string) => {
+      if (status !== 'authenticated') return
+
+      setIsLoading(true)
+      try {
+        const response = await fetch(
+          `/api/datasets/search?q=${encodeURIComponent(query)}&page=${page}&limit=6`
+        )
+        if (!response.ok) {
+          throw new Error('Failed to fetch datasets')
+        }
+        const data = await response.json()
+        setDatasets(data.datasets)
+        setTotalPages(data.totalPages)
+      } catch (error) {
+        console.error('Error fetching datasets:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch datasets. Please try again.',
+          variant: 'destructive',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [status, toast]
+  )
+
   useEffect(() => {
     if (status === 'authenticated') {
       fetchDatasets(currentPage, searchQuery)
     } else if (status === 'unauthenticated') {
       setIsLoading(false)
     }
-  }, [currentPage, searchQuery, status])
-
-  const fetchDatasets = async (page: number, query: string) => {
-    if (status !== 'authenticated') return
-
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/datasets/search?q=${encodeURIComponent(query)}&page=${page}&limit=6`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch datasets')
-      }
-      const data = await response.json()
-      setDatasets(data.datasets)
-      setTotalPages(data.totalPages)
-    } catch (error) {
-      console.error('Error fetching datasets:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch datasets. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [currentPage, searchQuery, status, fetchDatasets])
 
   const handleSearch = (value: string) => {
     setSearchQuery(value)
     setCurrentPage(1)
   }
 
-  const handleView = useCallback((id: string) => {
-    router.push(`/explore/${id}`)
-  }, [router])
+  const handleView = useCallback(
+    (id: string) => {
+      router.push(`/explore/${id}`)
+    },
+    [router]
+  )
 
-  const handleSave = useCallback(async (id: string, isSaved: boolean) => {
-    setSavingId(id)
-    try {
-      const response = await fetch('/api/datasets/save', {
-        method: isSaved ? 'DELETE' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ datasetId: id }),
-      })
+  const handleSave = useCallback(
+    async (id: string, isSaved: boolean) => {
+      setSavingId(id)
+      try {
+        const response = await fetch('/api/datasets/save', {
+          method: isSaved ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ datasetId: id }),
+        })
 
-      if (!response.ok) {
-        throw new Error('Failed to update saved status')
+        if (!response.ok) {
+          throw new Error('Failed to update saved status')
+        }
+
+        toast({
+          title: 'Success',
+          description: isSaved
+            ? 'Dataset unsaved successfully.'
+            : 'Dataset saved successfully.',
+        })
+        fetchDatasets(currentPage, searchQuery) // Refresh the list
+      } catch (error) {
+        console.error('Error updating saved status:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to update saved status. Please try again.',
+          variant: 'destructive',
+        })
+      } finally {
+        setSavingId(null)
       }
+    },
+    [currentPage, searchQuery, toast, fetchDatasets]
+  )
 
-      toast({
-        title: "Success",
-        description: isSaved ? "Dataset unsaved successfully." : "Dataset saved successfully.",
-      })
-      fetchDatasets(currentPage, searchQuery) // Refresh the list
-    } catch (error) {
-      console.error('Error updating saved status:', error)
-      toast({
-        title: "Error",
-        description: "Failed to update saved status. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setSavingId(null)
-    }
-  }, [currentPage, searchQuery, toast])
+  const handleDelete = useCallback(
+    async (id: string) => {
+      setDeletingId(id)
+      try {
+        const response = await fetch(`/api/datasets/${id}`, {
+          method: 'DELETE',
+        })
 
-  const handleDelete = useCallback(async (id: string) => {
-    setDeletingId(id)
-    try {
-      const response = await fetch(`/api/datasets/${id}`, {
-        method: 'DELETE',
-      })
+        if (!response.ok) {
+          throw new Error('Failed to delete dataset')
+        }
 
-      if (!response.ok) {
-        throw new Error('Failed to delete dataset')
+        toast({
+          title: 'Success',
+          description: 'Dataset deleted successfully.',
+        })
+        fetchDatasets(currentPage, searchQuery) // Refresh the list
+      } catch (error) {
+        console.error('Error deleting dataset:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to delete dataset. Please try again.',
+          variant: 'destructive',
+        })
+      } finally {
+        setDeletingId(null)
       }
-
-      toast({
-        title: "Success",
-        description: "Dataset deleted successfully.",
-      })
-      fetchDatasets(currentPage, searchQuery) // Refresh the list
-    } catch (error) {
-      console.error('Error deleting dataset:', error)
-      toast({
-        title: "Error",
-        description: "Failed to delete dataset. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setDeletingId(null)
-    }
-  }, [currentPage, searchQuery, toast])
+    },
+    [currentPage, searchQuery, toast, fetchDatasets]
+  )
 
   if (status === 'loading' || isLoading) {
     return (
@@ -182,5 +196,5 @@ export default function Dashboard() {
         </>
       )}
     </div>
-  );
+  )
 }

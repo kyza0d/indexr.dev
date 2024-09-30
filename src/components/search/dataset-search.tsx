@@ -39,8 +39,6 @@ export function DatasetSearch() {
     <SearchBar
       value={searchTerm}
       onChange={handleSearchChange}
-      placeholder="Search datasets..."
-      className="mb-6"
     />
   )
 }

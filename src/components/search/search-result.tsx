@@ -57,7 +57,7 @@ export const SearchResult: React.FC<SearchResultProps> = React.memo(({ result, s
   };
 
   const { expandAndScrollToNode } = useTreeContext();
-  const { scrollToRow, currentView, getSortedIndex } = useGridContext();
+  const { scrollToRow, currentView } = useGridContext();
 
 
   const handleJumpTo = useCallback(() => {
@@ -67,10 +67,6 @@ export const SearchResult: React.FC<SearchResultProps> = React.memo(({ result, s
       scrollToRow(result.originalIndex);
     }
   }, [result, currentView, expandAndScrollToNode, scrollToRow]);
-
-  const currentIndex = currentView === 'grid' && result.originalIndex !== undefined
-    ? getSortedIndex(result.originalIndex)
-    : result.currentIndex;
 
   return (
     <div className={`group flex flex-col py-1.5 ${depth > 0 ? 'ml-4' : ''} ${isDirectoryMatch ? 'bg-secondary/20 p-2 rounded' : ''}`}>
@@ -84,9 +80,6 @@ export const SearchResult: React.FC<SearchResultProps> = React.memo(({ result, s
         <PathDisplay
           path={pathWithTypes}
           searchTerm={searchTerm}
-          originalIndex={result.originalIndex}
-          currentIndex={currentIndex}
-          currentView={currentView}
         />
         {!hasNestedItems && (
           <>

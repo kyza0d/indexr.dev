@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     // Check if the dataset is public or if the user is authenticated and owns the dataset
-    if (!dataset.isPublic && (!session || session.user.id !== dataset.userId)) {
+    if (!dataset.isPublic && (!session || !session.user || session.user.id !== dataset.userId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

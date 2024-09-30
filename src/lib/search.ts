@@ -1,4 +1,3 @@
-// src/utils/search.ts
 import Fuse from 'fuse.js';
 import { IndexItem, Dataset } from '@/types';
 
@@ -22,7 +21,6 @@ function flattenIndexItems(items: IndexItem[]): IndexItem[] {
   items.forEach(item => flatten(item));
   return flattened;
 }
-
 
 const FUSE_THRESHOLD = 1000; // Adjust this value based on your performance tests
 
@@ -49,21 +47,24 @@ export function createSearchFunction(data: IndexItem[]) {
       if (!term.trim()) return [];
       const lowercaseTerm = term.toLowerCase();
       return flattenedData.filter(item =>
-        item.flattenedPath.toLowerCase().includes(lowercaseTerm) ||
-        String(item.data.value).toLowerCase().includes(lowercaseTerm)
+        (item.flattenedPath && item.flattenedPath.toLowerCase().includes(lowercaseTerm)) ||
+        (item.data.value && String(item.data.value).toLowerCase().includes(lowercaseTerm))
       );
     };
   }
 }
 
-
 export function searchDatasets(datasets: Dataset[], query: string): Dataset[] {
-  if (!query) return datasets
+  if (!query) return datasets;
 
-  const fuse = new Fuse(datasets, options)
-  return fuse.search(query).map(result => result.item)
+  const options = {
+    keys: ['name', 'description'], // Replace with actual Dataset properties
+    threshold: 0.4,
+    includeMatches: true,
+    ignoreLocation: true,
+    useExtendedSearch: true,
+  };
+
+  const fuse = new Fuse(datasets, options);
+  return fuse.search(query).map(result => result.item);
 }
-
-
-
-

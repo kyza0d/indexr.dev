@@ -1,12 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
-import { X, Check, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils"
-import { useDebounce } from '@/hooks/use-debounce'
 import { useDatasetSearch } from './dataset-search-context'
 
 type Tag = {
@@ -25,7 +22,6 @@ export function TagCompletionSearchBar() {
   const [cursorPosition, setCursorPosition] = useState(0)
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1)
-  const debouncedSearchTerm = useDebounce(inputValue, 300)
 
   const fetchAllTags = useCallback(async () => {
     setLoading(true)

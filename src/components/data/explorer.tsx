@@ -29,13 +29,6 @@ interface DataExplorerProps {
   initialDataset: Dataset
 }
 
-/**
- * DataExplorer component displays the dataset in tree or grid views,
- * handles searching, and displays search results.
- *
- * @param {DataExplorerProps} param0 - The props for DataExplorer component.
- * @returns JSX.Element
- */
 export function DataExplorer({ initialDataset }: DataExplorerProps) {
   const { data: session, status } = useSession()
   const [showRawData, setShowRawData] = useState<boolean>(false)
@@ -137,6 +130,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
               <SearchResultsPanel
                 searchResults={searchResults}
                 ItemRenderer={ItemRenderer}
+                fileType={dataset.fileType}
               />
             )}
           </PanelGroup>
@@ -146,7 +140,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
           onClose={() => setShowRawData(false)}
           datasetId={dataset.id}
           datasetName={dataset.name}
-          datasetDescription={dataset.description}
+          datasetDescription={dataset.description || undefined}
           fileType={dataset.fileType}
         />
       </GridProvider>
@@ -221,10 +215,12 @@ interface DataTabsProps {
 
 function DataTabs({
   dataset,
+  currentView,
   setCurrentView,
   setShowRawData,
   treeData,
   gridData,
+  searchTerm,
   isOwner,
   onSaveToggle,
 }: DataTabsProps) {
@@ -295,7 +291,7 @@ function DataTabs({
 interface SearchResultsPanelProps {
   searchResults: IndexItem[]
   ItemRenderer: React.ComponentType<{ item: IndexItem; index: number }>
-  fileType: 'json' | 'csv'
+  fileType: string
 }
 
 function SearchResultsPanel({
@@ -321,7 +317,6 @@ function SearchResultsPanel({
                       <ItemRenderer
                         item={{
                           ...searchResults[index],
-                          fileType,
                           currentIndex: index,
                         }}
                         index={index}
@@ -346,3 +341,5 @@ function SearchResultsPanel({
     </>
   )
 }
+
+export default DataExplorer

@@ -21,7 +21,7 @@ export default function AboutPage() {
             It provides users with powerful tools to upload, analyze, and interact with complex data structures through an intuitive interface.
           </p>
           <p>
-            Whether you're a data scientist, analyst, or developer, Indexr simplifies the process of understanding and working with large datasets.
+            Whether you&apos;re a data scientist, analyst, or developer, Indexr simplifies the process of understanding and working with large datasets.
           </p>
         </CardContent>
       </Card>
