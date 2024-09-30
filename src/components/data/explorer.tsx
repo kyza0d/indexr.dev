@@ -215,12 +215,10 @@ interface DataTabsProps {
 
 function DataTabs({
   dataset,
-  currentView,
   setCurrentView,
   setShowRawData,
   treeData,
   gridData,
-  searchTerm,
   isOwner,
   onSaveToggle,
 }: DataTabsProps) {
