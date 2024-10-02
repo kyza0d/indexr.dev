@@ -141,7 +141,7 @@ export function TagCompletionSearchBar() {
     <div className="w-full max-w-2xl">
       <div className="flex items-center p-2 border rounded-md relative">
         {/* Search Icon */}
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
 
         {/* Tag Input Area */}
         <div className="flex flex-wrap items-center gap-2 w-full pl-10">

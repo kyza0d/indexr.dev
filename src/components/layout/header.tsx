@@ -44,10 +44,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           </nav>
         </div>
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/explore')}>
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Search</span>
-          </Button>
           <Button variant="outline" onClick={() => setUploadDatasetDialogOpen(true)}>
             <Upload className="h-4 w-4 mr-2" />
             Upload
