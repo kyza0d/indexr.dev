@@ -14,11 +14,11 @@ function flattenIndexItems(items: IndexItem[]): IndexItem[] {
     flattened.push(flatItem);
 
     if (item.children) {
-      item.children.forEach(child => flatten(child, currentPath));
+      item.children.forEach((child) => flatten(child, currentPath));
     }
   }
 
-  items.forEach(item => flatten(item));
+  items.forEach((item) => flatten(item));
   return flattened;
 }
 
@@ -39,16 +39,19 @@ export function createSearchFunction(data: IndexItem[]) {
     return function search(term: string): IndexItem[] {
       if (!term.trim()) return [];
       const results = fuse.search(term);
-      return results.map(result => result.item);
+      return results.map((result) => result.item);
     };
   } else {
     // Use a simple string matching for larger datasets
     return function search(term: string): IndexItem[] {
       if (!term.trim()) return [];
       const lowercaseTerm = term.toLowerCase();
-      return flattenedData.filter(item =>
-        (item.flattenedPath && item.flattenedPath.toLowerCase().includes(lowercaseTerm)) ||
-        (item.data.value && String(item.data.value).toLowerCase().includes(lowercaseTerm))
+      return flattenedData.filter(
+        (item) =>
+          (item.flattenedPath &&
+            item.flattenedPath.toLowerCase().includes(lowercaseTerm)) ||
+          (item.data.value &&
+            String(item.data.value).toLowerCase().includes(lowercaseTerm))
       );
     };
   }
@@ -66,5 +69,5 @@ export function searchDatasets(datasets: Dataset[], query: string): Dataset[] {
   };
 
   const fuse = new Fuse(datasets, options);
-  return fuse.search(query).map(result => result.item);
+  return fuse.search(query).map((result) => result.item);
 }

@@ -6,87 +6,29 @@ export const normalizeData = async (
   data: string | ArrayBuffer | object,
   fileType: FileType
 ): Promise<IndexItem[]> => {
+  let result: IndexItem[];
+
   if (fileType === 'text/csv') {
     if (typeof data === 'string') {
-      return normalizeCSV(data);
+      result = [normalizeJSON(parseCSV(data))];
     } else if (data instanceof ArrayBuffer) {
       const decoder = new TextDecoder('utf-8');
       const text = decoder.decode(new Uint8Array(data));
-      return normalizeCSV(text);
+      result = [normalizeJSON(parseCSV(text))];
     } else {
       throw new Error('Data must be a string or ArrayBuffer for CSV files');
     }
   } else if (fileType === 'application/json') {
     const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
-    return normalizeJSON(jsonData);
+    result = [normalizeJSON(jsonData)];
   } else {
     throw new Error(`Unsupported file type: ${fileType}`);
   }
+
+  return result;
 };
 
-export function countTotalItems(data: IndexItem[]): number {
-  let count = 0;
-
-  function countRecursive(item: IndexItem) {
-    count++;
-    if (item.children) {
-      item.children.forEach(countRecursive);
-    }
-  }
-
-  data.forEach(countRecursive);
-  return count;
-}
-
-const normalizeJSON = (
-  data: JsonValue,
-  key: string = 'root',
-  path: string[] = []
-): IndexItem[] => {
-  const currentPath = [...path, key];
-  const type = inferType(data);
-
-  if (Array.isArray(data)) {
-    return [
-      {
-        id: currentPath.join('.'),
-        type: 'array',
-        data: { key, value: `Array` },
-        path: currentPath,
-        children: data.map(
-          (item, index) => normalizeJSON(item, `[${index}]`, currentPath)[0]
-        ),
-        rawData: data,
-      },
-    ];
-  } else if (typeof data === 'object' && data !== null) {
-    return [
-      {
-        id: currentPath.join('.'),
-        type: 'object',
-        data: { key, value: 'Object' },
-        path: currentPath,
-        children: Object.entries(data).flatMap(([k, v]) =>
-          normalizeJSON(v, k, currentPath)
-        ),
-        rawData: data,
-      },
-    ];
-  } else {
-    return [
-      {
-        id: currentPath.join('.'),
-        type,
-        data: { key, value: data },
-        path: currentPath,
-        rawData: data,
-      },
-    ];
-  }
-};
-
-const normalizeCSV = (csvString: string): IndexItem[] => {
-  // Parse the CSV string
+const parseCSV = (csvString: string): JsonValue => {
   const rows: Array<{ [key: string]: string }> = parse(csvString, {
     columns: true,
     skip_empty_lines: true,
@@ -111,8 +53,122 @@ const normalizeCSV = (csvString: string): IndexItem[] => {
     return obj;
   });
 
-  return normalizeJSON(data);
+  return data;
 };
+
+const ARRAY_LIMIT = 1000; // Define a limit for processing large arrays
+const MAX_DEPTH = 10; // Maximum recursion depth
+
+const visitedObjects = new WeakSet<object>();
+
+const normalizeJSON = (
+  data: JsonValue,
+  key: string = 'root',
+  path: string[] = [],
+  depth: number = 0
+): IndexItem => {
+  const currentPath = [...path, key];
+  const type = inferType(data);
+
+  if (depth > MAX_DEPTH) {
+    return {
+      id: currentPath.join('.'),
+      type: 'max_depth',
+      data: { key, value: 'Max depth reached' },
+      path: currentPath,
+      rawData: null,
+    };
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    if (visitedObjects.has(data)) {
+      return {
+        id: currentPath.join('.'),
+        type: 'circular',
+        data: { key, value: 'Circular Reference' },
+        path: currentPath,
+        rawData: null,
+      };
+    }
+    visitedObjects.add(data);
+
+    if (Array.isArray(data)) {
+      const arrayLength = data.length;
+      let children: IndexItem[] = [];
+
+      if (arrayLength > ARRAY_LIMIT) {
+        children = data.slice(0, ARRAY_LIMIT).map((item, index) =>
+          normalizeJSON(item, `[${index}]`, currentPath, depth + 1)
+        );
+        // Add a node indicating that the array has been truncated
+        children.push({
+          id: currentPath.concat('...').join('.'),
+          type: 'notice',
+          data: {
+            key: '...',
+            value: `Array truncated. ${arrayLength - ARRAY_LIMIT} items not displayed.`,
+          },
+          path: currentPath.concat('...'),
+          rawData: null,
+        });
+      } else {
+        children = data.map((item, index) =>
+          normalizeJSON(item, `[${index}]`, currentPath, depth + 1)
+        );
+      }
+
+      visitedObjects.delete(data)
+
+      return {
+        id: currentPath.join('.'),
+        type: 'array',
+        data: { key, value: `Array (${arrayLength} items)` },
+        path: currentPath,
+        children,
+        rawData: data,
+      };
+    } else {
+      const entries = Object.entries(data);
+      const children = entries.map(([k, v]) =>
+        normalizeJSON(v, k, currentPath, depth + 1)
+      );
+
+      visitedObjects.delete(data); // Clean up after processing
+
+      return {
+        id: currentPath.join('.'),
+        type: 'object',
+        data: { key, value: 'Object' },
+        path: currentPath,
+        children,
+        rawData: data,
+      };
+    }
+  } else {
+    // Handle primitive types
+    return {
+      id: currentPath.join('.'),
+      type,
+      data: { key, value: data },
+      path: currentPath,
+      rawData: data,
+    };
+  }
+};
+
+export function countTotalItems(data: IndexItem[]): number {
+  let count = 0;
+
+  function countRecursive(item: IndexItem) {
+    count++;
+    if (item.children) {
+      item.children.forEach(countRecursive);
+    }
+  }
+
+  data.forEach(countRecursive);
+  return count;
+}
 
 export function buildTreeData(data: IndexItem[]): TreeNode[] {
   const buildTreeNode = (item: IndexItem): TreeNode => ({
@@ -120,9 +176,7 @@ export function buildTreeData(data: IndexItem[]): TreeNode[] {
     type: item.type as InferredType,
     data: { value: item.data.value },
     children: item.children ? item.children.map(buildTreeNode) : undefined,
-    path: item.path
-      .slice(1)
-      .map((p) => ({ key: p, type: item.type as InferredType })),
+    path: item.path.slice(1).map((p) => ({ key: p, type: item.type as InferredType })),
   });
 
   // Return the children of the root node
