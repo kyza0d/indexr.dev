@@ -3,7 +3,6 @@
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { del } from '@vercel/blob'
 
 export async function deleteDataset(id: string) {
@@ -75,20 +74,28 @@ export async function deleteDataset(id: string) {
 }
 
 export async function fetchDataset(id: string) {
-  const session = await auth()
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    // User is not authenticated, proceed with session as null
+  }
 
   try {
     const dataset = await prisma.dataset.findUnique({
       where: { id },
-    })
+    });
 
     if (!dataset) {
-      return { error: 'Dataset not found' }
+      return { error: 'Dataset not found' };
     }
 
-    // Check if the dataset is public or if the user is authenticated and owns the dataset
-    if (!dataset.isPublic && (!session || session.user?.id !== dataset.userId)) {
-      return { error: 'Unauthorized' }
+    // Authorization Logic
+    if (!dataset.isPublic) {
+      // Dataset is private
+      if (!session || session.user?.id !== dataset.userId) {
+        return { error: 'Unauthorized' };
+      }
     }
 
     return {
@@ -100,32 +107,53 @@ export async function fetchDataset(id: string) {
       updatedAt: dataset.updatedAt,
       isPublic: dataset.isPublic,
       userId: dataset.userId,
-    }
+    };
   } catch (error) {
-    console.error('Error fetching dataset:', error)
-    return { error: 'Failed to fetch dataset' }
+    console.error('Error fetching dataset:', error);
+    return { error: 'Failed to fetch dataset' };
   }
 }
 
 export async function fetchDatasets() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    redirect('/auth/signin')
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    // User is not authenticated; proceed with session as null
   }
 
   try {
-    const datasets = await prisma.dataset.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        tags: true, // Include the tags
-      },
-    });
+    let datasets;
 
-    return { datasets, error: null }
+    if (session?.user?.id) {
+      // User is authenticated
+      datasets = await prisma.dataset.findMany({
+        where: {
+          OR: [
+            { userId: session.user.id }, // User's own datasets
+            { isPublic: true },          // Public datasets
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          tags: true, // Include the tags
+        },
+      });
+    } else {
+      // User is not authenticated
+      datasets = await prisma.dataset.findMany({
+        where: { isPublic: true }, // Only public datasets
+        orderBy: { createdAt: 'desc' },
+        include: {
+          tags: true, // Include the tags
+        },
+      });
+    }
+
+    return { datasets, error: null };
   } catch (error) {
-    console.error('Error fetching datasets:', error)
-    return { datasets: [], error: 'Failed to fetch datasets' }
+    console.error('Error fetching datasets:', error);
+    return { datasets: [], error: 'Failed to fetch datasets' };
   }
 }
 

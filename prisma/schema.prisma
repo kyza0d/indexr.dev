@@ -28,13 +28,13 @@ model Dataset {
 
 model DatasetView {
   id        String   @id @default(cuid())
+  userId    String?
   datasetId String
-  userId    String
   viewedAt  DateTime @default(now())
   dataset   Dataset  @relation("DatasetToView", fields: [datasetId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
 
-  @@unique([datasetId, userId])
+  @@index([datasetId, userId])
 }
 
 model Tag {

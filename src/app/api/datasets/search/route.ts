@@ -1,35 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client'; // Import Prisma types
+import { Prisma } from '@prisma/client';
+import { auth } from '@/auth'; // Import your authentication function
 
 export async function GET(req: NextRequest) {
+  // Get the current user's session
+  const session = await auth();
+  const userId = session?.user?.id || null;
+
   const searchParams = req.nextUrl.searchParams;
   const query = searchParams.get('q') || '';
   const tags = searchParams.getAll('tag');
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const pageSize = 12; // Number of items per page
+  const pageSize = 12;
 
   try {
     const skip = (page - 1) * pageSize;
 
-    // Explicitly type the 'where' object
-    const where: Prisma.DatasetWhereInput = {
-      OR: [
-        {
-          name: {
-            contains: query,
-            mode: Prisma.QueryMode.insensitive, // Use Prisma.QueryMode enum
+    // Build the 'where' conditions
+    const whereConditions: Prisma.DatasetWhereInput[] = [];
+
+    // Visibility filter: include public datasets and user's own datasets
+    if (userId) {
+      whereConditions.push({
+        OR: [
+          { isPublic: true },
+          { userId: userId },
+        ],
+      });
+    } else {
+      whereConditions.push({
+        isPublic: true,
+      });
+    }
+
+    // Search query filter
+    if (query) {
+      whereConditions.push({
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: Prisma.QueryMode.insensitive,
+            },
           },
-        },
-        {
-          description: {
-            contains: query,
-            mode: Prisma.QueryMode.insensitive,
+          {
+            description: {
+              contains: query,
+              mode: Prisma.QueryMode.insensitive,
+            },
           },
-        },
-      ],
-      // Conditionally include the 'tags' filter
-      ...(tags.length > 0 && {
+        ],
+      });
+    }
+
+    // Tags filter
+    if (tags.length > 0) {
+      whereConditions.push({
         tags: {
           some: {
             name: {
@@ -37,7 +64,12 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-      }),
+      });
+    }
+
+    // Combine all conditions
+    const where: Prisma.DatasetWhereInput = {
+      AND: whereConditions,
     };
 
     const [datasets, totalCount] = await Promise.all([

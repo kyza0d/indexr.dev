@@ -62,11 +62,7 @@ export function RecentDatasets() {
   }
 
   if (status === 'unauthenticated') {
-    return (
-      <div className="text-sm text-muted-foreground p-2">
-        Please log in to view recent datasets
-      </div>
-    )
+    return null
   }
 
   if (error) {

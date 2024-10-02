@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { normalizeData } from '@/lib/data-processing';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   console.log('Entering GET function for dataset data');
   try {
-    const session = await auth();
-    console.log('Auth session:', session ? 'exists' : 'does not exist');
-
     const { id } = params;
     console.log('Dataset ID:', id);
 
@@ -19,6 +15,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     console.log('Fetching dataset from database');
     const dataset = await prisma.dataset.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        fileUrl: true,
+        fileType: true,
+        isPublic: true,
+        userId: true,
+      },
     });
 
     if (!dataset) {
@@ -28,9 +32,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     console.log('Dataset found:', dataset.name);
 
-    // Check if the dataset is public or if the user is authenticated and owns the dataset
-    if (!dataset.isPublic && (!session || !session.user || session.user.id !== dataset.userId)) {
-      console.log('Unauthorized access attempt');
+    // Check if the dataset is public
+    if (!dataset.isPublic) {
+      // Dataset is not public; deny access
+      console.log('Unauthorized access attempt to a private dataset');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -40,11 +45,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     console.log('Fetching file content from URL:', dataset.fileUrl);
-    // Fetch the file content directly from the Vercel Blob storage URL
     const response = await fetch(dataset.fileUrl);
     if (!response.ok) {
       console.error(`Failed to fetch file: ${response.statusText}. URL: ${dataset.fileUrl}`);
-      return NextResponse.json({ error: `Failed to fetch file: ${response.statusText}` }, { status: response.status });
+      return NextResponse.json(
+        { error: `Failed to fetch file: ${response.statusText}` },
+        { status: response.status }
+      );
     }
     const fileContent = await response.text();
     console.log('File content fetched successfully');
@@ -62,6 +69,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
   } catch (error) {
     console.error('Error in dataset data route:', error);
-    return NextResponse.json({ error: 'Error fetching dataset: ' + (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error fetching dataset: ' + (error as Error).message },
+      { status: 500 }
+    );
   }
 }

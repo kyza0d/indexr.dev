@@ -1,16 +1,21 @@
+// src/app/api/datasets/[id]/raw-data/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 const CHUNK_SIZE = 1000;
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Optional authentication
+    let session = null;
+    try {
+      session = await auth();
+    } catch (error) {
+      // User is not authenticated; proceed without session
     }
 
+    const userId = session?.user?.id || null;
     const { id } = params;
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -18,12 +23,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     console.log('Fetching dataset with id:', id);
     const dataset = await prisma.dataset.findUnique({
-      where: { id, userId: session.user.id },
+      where: { id },
+      select: {
+        fileUrl: true,
+        isPublic: true,
+        userId: true,
+      },
     });
 
     if (!dataset) {
       console.log('Dataset not found for id:', id);
       return NextResponse.json({ error: 'Dataset not found' }, { status: 404 });
+    }
+
+    // Authorization Logic
+    if (!dataset.isPublic) {
+      if (!userId || userId !== dataset.userId) {
+        console.log('Unauthorized access attempt to private dataset');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     if (!dataset.fileUrl) {
@@ -72,6 +90,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
   } catch (error) {
     console.error('Error in raw-data route:', error);
-    return NextResponse.json({ error: 'Error fetching raw dataset: ' + (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error fetching raw dataset: ' + (error as Error).message },
+      { status: 500 }
+    );
   }
 }

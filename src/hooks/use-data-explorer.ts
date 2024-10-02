@@ -27,14 +27,25 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
         normalizedData = await dataset.getData();
         rawDataContent = JSON.stringify(normalizedData, null, 2);
       } else {
+        const fetchOptions = { credentials: 'omit' as RequestCredentials };
+
         const [normalizedResponse, rawResponse] = await Promise.all([
-          fetch(`/api/datasets/${dataset.id}/data`),
-          fetch(`/api/datasets/${dataset.id}/data?raw=true`)
+          fetch(`/api/datasets/${dataset.id}/data`, fetchOptions),
+          fetch(`/api/datasets/${dataset.id}/data?raw=true`, fetchOptions),
         ]);
 
         if (!normalizedResponse.ok || !rawResponse.ok) {
-          const errorData = await normalizedResponse.json();
-          throw new Error(errorData.error || 'Failed to fetch data');
+          let errorMessage = 'Failed to fetch data';
+
+          try {
+            const errorData = await normalizedResponse.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            // If parsing JSON fails, keep the default error message
+            console.error('Failed to parse error response as JSON:', e);
+          }
+
+          throw new Error(errorMessage);
         }
 
         normalizedData = await normalizedResponse.json();
@@ -44,6 +55,7 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
       setData(normalizedData);
       setRawData(rawDataContent);
       setTotalItems(countTotalItems(normalizedData));
+
     } catch (err) {
       console.error('Error fetching data:', err);
       setError((err as Error).message);

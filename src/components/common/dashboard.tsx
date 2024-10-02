@@ -158,12 +158,7 @@ export default function Dashboard() {
   }
 
   if (status === 'unauthenticated') {
-    return (
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-        <p>Please log in to view your datasets.</p>
-      </div>
-    )
+    return null
   }
 
   return (
