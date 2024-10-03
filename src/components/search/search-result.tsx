@@ -92,7 +92,6 @@ export const SearchResult: React.FC<SearchResultProps> = React.memo(({ result, s
         <PathDisplay
           path={pathWithTypes}
           searchTerm={searchTerm}
-          className="overflow-hidden text-ellipsis"
         />
 
         {!hasNestedItems && (

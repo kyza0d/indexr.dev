@@ -399,7 +399,7 @@ function MobileMenu({
 }: MobileMenuProps) {
   return (
     <div className="w-full mt-4 flex items-center">
-      <SearchBar value={searchTerm} onChange={onSearch} className="w-full" />
+      <SearchBar value={searchTerm} onChange={onSearch} />
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" className="ml-2" aria-label="Menu">
@@ -423,7 +423,6 @@ function MobileMenu({
                   datasetId={dataset.id}
                   isSaved={dataset.isSaved}
                   onSaveToggle={onSaveToggle}
-                  className="w-full mt-2"
                 />
               )}
             </div>
