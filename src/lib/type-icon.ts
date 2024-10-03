@@ -1,4 +1,4 @@
-import { Hash, ToggleLeft, Calendar, Mail, Phone, Globe, DollarSign, Percent, FileText, Type, AlertCircle, List, Folder, Binary, Code, X, Ban } from 'lucide-react';
+import { Hash, ToggleLeft, Calendar, Mail, DollarSign, Percent, FileText, AlertCircle, List, Folder, Binary, Code, X, Ban } from 'lucide-react';
 
 import { InferredType } from './type-inference';
 
@@ -8,11 +8,8 @@ export const getIcon = (type: InferredType) => {
     case 'boolean': return { icon: ToggleLeft, className: "text-green-500" };
     case 'date': return { icon: Calendar, className: "text-orange-500" };
     case 'email': return { icon: Mail, className: "text-purple-500" };
-    case 'phone': return { icon: Phone, className: "text-pink-500" };
-    case 'website': case 'url': return { icon: Globe, className: "text-teal-500" };
     case 'currency': return { icon: DollarSign, className: "text-yellow-500" };
     case 'percentage': return { icon: Percent, className: "text-indigo-500" };
-    case 'name': return { icon: Type, className: "text-red-500" };
     case 'array': return { icon: List, className: "text-gray-500" };
     case 'object': return { icon: Folder, className: "text-gray-500" };
     case 'null': return { icon: Ban, className: "text-gray-500" };

@@ -1,3 +1,5 @@
+import { JsonValue } from '@/types';
+
 export type InferredType =
   | 'undefined'
   | 'any'
@@ -14,7 +16,10 @@ export type InferredType =
   | 'empty'
   | 'unknown'
   | 'bigint'
-  | 'regex';
+  | 'regex'
+  | 'max_depth'
+  | 'circular'
+  | 'notice';
 
 export function inferType(value: any): InferredType {
   if (value == null) return 'null';
