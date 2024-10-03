@@ -1,5 +1,4 @@
 import { JsonValue } from '@/types';
-import validator from 'validator';
 
 export type InferredType =
   | 'undefined'
@@ -9,55 +8,79 @@ export type InferredType =
   | 'boolean'
   | 'date'
   | 'email'
-  | 'phone'
-  | 'website'
-  | 'ip'
   | 'array'
   | 'object'
   | 'null'
-  | 'name'
   | 'currency'
   | 'percentage'
-  | 'uuid'
-  | 'url'
   | 'empty'
   | 'unknown'
   | 'bigint'
-  | 'regex'
-  | 'max_depth'
-  | 'circular'
-  | 'notice'
+  | 'regex';
 
-export const inferType = (value: any): InferredType => {
-  if (value === null || value === undefined) return 'null';
+export function inferType(value: any): InferredType {
+  if (value == null) return 'null';
+
+  const valueType = typeof value;
+
+  if (valueType === 'boolean') return 'boolean';
+  if (valueType === 'number' || valueType === 'bigint') return 'number';
   if (Array.isArray(value)) return 'array';
-  if (typeof value === 'object') {
-    if (value instanceof RegExp) return 'regex';
-    return 'object';
-  }
-  if (typeof value === 'symbol') return 'unknown';
-  if (typeof value === 'bigint') return 'bigint';
+  if (value instanceof RegExp) return 'regex';
+  if (valueType === 'object') return 'object';
 
   const stringValue = String(value).trim();
   if (stringValue === '') return 'empty';
 
-  // Simple type checks
-  if (/^(true|false)$/i.test(stringValue)) return 'boolean';
-  if (/^-?\d+(\.\d+)?$/.test(stringValue)) return 'number';
+  const lowerValue = stringValue.toLowerCase();
+  if (lowerValue === 'true' || lowerValue === 'false') return 'boolean';
 
-  // Use validator.js for advanced validations
-  if (validator.isEmail(stringValue)) return 'email';
-  if (validator.isURL(stringValue, { require_protocol: true })) return 'url';
-  if (validator.isDate(stringValue)) return 'date';
-  if (validator.isMobilePhone(stringValue, 'any')) return 'phone';
-  if (validator.isIP(stringValue)) return 'ip';
-  if (validator.isUUID(stringValue)) return 'uuid';
+  const numericValue = Number(stringValue.replace(/,/g, ''));
+  if (!isNaN(numericValue)) return 'number';
 
-  // Currency and percentage checks
+  if (!isNaN(Date.parse(stringValue))) return 'date';
+
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stringValue)) return 'email';
+
   if (/^-?\d+(\.\d+)?%$/.test(stringValue)) return 'percentage';
 
+  if (/^[\$€£¥₹]\s?-?\d+(,\d{3})*(\.\d+)?$/.test(stringValue.replace(/\s/g, ''))) {
+    return 'currency';
+  }
+
   return 'string';
-};
+}
+
+export type TypeInfo = InferredType | { [key: string]: TypeInfo };
+
+export function inferDataTypes(data: JsonValue): TypeInfo {
+  if (Array.isArray(data)) {
+    return { type: 'array', items: inferDataTypes(data[0]) };
+  } else if (data && typeof data === 'object') {
+    const result: { [key: string]: TypeInfo } = {};
+    for (const key in data) {
+      result[key] = inferDataTypes((data as any)[key]);
+    }
+    return result;
+  } else {
+    return inferType(data);
+  }
+}
+
+export function getTypeFromPath(typeInfo: TypeInfo, path: string[]): InferredType {
+  let current: TypeInfo = typeInfo;
+  for (const segment of path) {
+    if (typeof current === 'string') return current;
+    if ('type' in current && current.type === 'array' && 'items' in current) {
+      current = current.items;
+    } else if (typeof current === 'object' && segment in current) {
+      current = current[segment];
+    } else {
+      return 'unknown';
+    }
+  }
+  return typeof current === 'string' ? current : 'object';
+}
 
 export const inferColumnTypes = (data: any[][]): InferredType[] => {
   if (data.length === 0 || data[0].length === 0) return [];
@@ -75,40 +98,8 @@ export const inferColumnTypes = (data: any[][]): InferredType[] => {
   }
 
   return typeCounts.map((counts) => {
-    const sortedTypes = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const sortedTypes = Object.entries(counts).sort((a, b) => (b[1] as number) - (a[1] as number));
     return sortedTypes.length > 0 ? (sortedTypes[0][0] as InferredType) : 'unknown';
   });
 };
 
-export type TypeInfo = InferredType | { [key: string]: TypeInfo };
-
-export function inferDataTypes(data: JsonValue): TypeInfo {
-  if (Array.isArray(data)) {
-    return { type: 'array', items: inferDataTypes(data[0]) };
-  } else if (typeof data === 'object' && data !== null) {
-    const result: { [key: string]: TypeInfo } = {};
-    for (const [key, value] of Object.entries(data)) {
-      result[key] = inferDataTypes(value);
-    }
-    return result;
-  } else {
-    return inferType(data);
-  }
-}
-
-export function getTypeFromPath(typeInfo: TypeInfo, path: string[]): InferredType {
-  let current: TypeInfo = typeInfo;
-  for (const segment of path) {
-    if (typeof current === 'string') {
-      return current;
-    }
-    if (current.type === 'array' && 'items' in current) {
-      current = current.items;
-    } else if (typeof current === 'object' && segment in current) {
-      current = current[segment];
-    } else {
-      return 'unknown';
-    }
-  }
-  return typeof current === 'string' ? current : 'object';
-}
