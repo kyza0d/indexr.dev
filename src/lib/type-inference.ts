@@ -1,5 +1,3 @@
-import { JsonValue } from '@/types';
-
 export type InferredType =
   | 'undefined'
   | 'any'
