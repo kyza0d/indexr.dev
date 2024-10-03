@@ -60,7 +60,7 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
     updateSortedIndices(sortedData.map(item => item.originalIndex));
   }, [sortedData, updateSortedIndices]);
 
-  const { columns, headers, rowCount, totalWidth } = useGridData(sortedData, columnWidths);
+  const { columns, headers, rowCount } = useGridData(sortedData, columnWidths);
 
   const handleSort = useCallback((header: string) => {
     setSortConfig((prevConfig) => {
@@ -108,6 +108,8 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
   const renderRow = useRenderRow(headers, columns, renderCell);
   const renderHeader = useRenderHeader(headers, columns, sortConfig, handleSort, handleColumnMouseDown);
 
+  const components = useMemo(() => getVirtuosoComponents(), []);
+
   if (!data || data.length === 0) {
     return <div>No data available</div>;
   }
@@ -119,7 +121,7 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
         data={sortedData}
         totalCount={rowCount}
         overscan={200}
-        components={getVirtuosoComponents(totalWidth + ROW_INDEX_WIDTH)}
+        components={components}
         fixedHeaderContent={renderHeader}
         itemContent={renderRow}
         style={{ height: '80vh' }}
@@ -154,7 +156,6 @@ const useGridData = (
         width: ROW_INDEX_WIDTH,
       },
     };
-    let totalWidth = ROW_INDEX_WIDTH;
 
     Object.keys(data[0]).forEach((key, index) => {
       if (key !== 'originalIndex') { // Exclude originalIndex from being a visible column
@@ -178,7 +179,6 @@ const useGridData = (
           maxLength * CHAR_WIDTH + PADDING,
           MIN_COLUMN_WIDTH
         );
-        totalWidth += column.width;
       }
     });
 
@@ -186,7 +186,6 @@ const useGridData = (
       columns,
       headers: ['rowIndex', ...Object.keys(data[0]).filter(key => key !== 'originalIndex')],
       rowCount: data.length,
-      totalWidth,
     };
   }, [data, columnWidths]);
 };
@@ -309,14 +308,13 @@ const useRenderHeader = (
 
 /**
  * Returns customized Virtuoso components with proper types.
- * @param totalWidth - The total width of the table.
  * @returns An object containing Virtuoso components.
  */
-const getVirtuosoComponents = (totalWidth: number) => ({
+const getVirtuosoComponents = () => ({
   Table: (props: React.HTMLProps<HTMLTableElement>) => (
     <table
       {...props}
-      style={{ width: `${totalWidth}px`, tableLayout: 'fixed' }}
+      style={{ tableLayout: 'fixed', width: '100%' }}
       className="w-full border-collapse"
       role="grid"
     />
