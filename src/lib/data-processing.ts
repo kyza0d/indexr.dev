@@ -56,29 +56,15 @@ const parseCSV = (csvString: string): JsonValue => {
   return data;
 };
 
-const ARRAY_LIMIT = 1000; // Define a limit for processing large arrays
-const MAX_DEPTH = 10; // Maximum recursion depth
-
 const visitedObjects = new WeakSet<object>();
 
 const normalizeJSON = (
   data: JsonValue,
   key: string = 'root',
-  path: string[] = [],
-  depth: number = 0
+  path: string[] = []
 ): IndexItem => {
   const currentPath = [...path, key];
   const type = inferType(data);
-
-  if (depth > MAX_DEPTH) {
-    return {
-      id: currentPath.join('.'),
-      type: 'max_depth',
-      data: { key, value: 'Max depth reached' },
-      path: currentPath,
-      rawData: null,
-    };
-  }
 
   if (typeof data === 'object' && data !== null) {
     if (visitedObjects.has(data)) {
@@ -94,30 +80,11 @@ const normalizeJSON = (
 
     if (Array.isArray(data)) {
       const arrayLength = data.length;
-      let children: IndexItem[] = [];
+      const children = data.map((item, index) =>
+        normalizeJSON(item, `[${index}]`, currentPath)
+      );
 
-      if (arrayLength > ARRAY_LIMIT) {
-        children = data.slice(0, ARRAY_LIMIT).map((item, index) =>
-          normalizeJSON(item, `[${index}]`, currentPath, depth + 1)
-        );
-        // Add a node indicating that the array has been truncated
-        children.push({
-          id: currentPath.concat('...').join('.'),
-          type: 'notice',
-          data: {
-            key: '...',
-            value: `Array truncated. ${arrayLength - ARRAY_LIMIT} items not displayed.`,
-          },
-          path: currentPath.concat('...'),
-          rawData: null,
-        });
-      } else {
-        children = data.map((item, index) =>
-          normalizeJSON(item, `[${index}]`, currentPath, depth + 1)
-        );
-      }
-
-      visitedObjects.delete(data)
+      visitedObjects.delete(data);
 
       return {
         id: currentPath.join('.'),
@@ -130,10 +97,10 @@ const normalizeJSON = (
     } else {
       const entries = Object.entries(data);
       const children = entries.map(([k, v]) =>
-        normalizeJSON(v, k, currentPath, depth + 1)
+        normalizeJSON(v, k, currentPath)
       );
 
-      visitedObjects.delete(data); // Clean up after processing
+      visitedObjects.delete(data);
 
       return {
         id: currentPath.join('.'),
