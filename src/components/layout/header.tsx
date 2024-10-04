@@ -30,7 +30,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           </Button>
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-primary">indexr</span>
-            <Badge variant="secondary">v1.0.0</Badge>
+            <Badge variant="secondary">beta</Badge>
           </Link>
           <nav className="hidden md:flex items-center space-x-4 pl-4">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
