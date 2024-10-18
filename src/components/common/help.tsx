@@ -7,12 +7,6 @@ import ReactMarkdown from 'react-markdown';
 import {
   ChevronDown,
   ChevronRight,
-  BookOpen,
-  Search,
-  Settings,
-  Layers,
-  Grid,
-  PieChart,
 } from 'lucide-react'
 
 // Types
@@ -25,7 +19,6 @@ interface Section {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
   subsections?: Subsection[];
 }
 
@@ -33,7 +26,6 @@ interface Subsection {
   id: string;
   title: string;
   description: string;
-  icon?: React.ReactNode;
 }
 
 interface DescriptionProps {
@@ -52,7 +44,6 @@ const sections: Section[] = [
     id: 'get-started',
     title: 'Get Started',
     description: "Indexr allows you to explore and analyze JSON and CSV datasets efficiently. Upload your data to navigate, search, and understand your datasets with ease.",
-    icon: <BookOpen className="h-6 w-6 mr-3" />,
     subsections: [
       {
         id: 'quick-start',
@@ -62,14 +53,12 @@ const sections: Section[] = [
 3. Your dataset will appear in the main view.
 4. Use **Tree View** or **Grid View** to explore your data.
 5. Utilize the search function to find specific data points.`,
-        icon: <BookOpen className="h-6 w-6 mr-3" />,
       },
       {
         id: 'system-requirements',
         title: 'System Requirements',
         description: `- Modern browsers: **Chrome**, **Firefox**, or **Edge**.
 - For datasets larger than **100MB**, at least **8GB RAM** is recommended for optimal performance.`,
-        icon: <Settings className="h-6 w-6 mr-3" />,
       }
     ]
   },
@@ -77,7 +66,6 @@ const sections: Section[] = [
     id: 'data-exploration',
     title: 'Data Exploration',
     description: "Leverage Indexr's features to analyze your datasets effectively:",
-    icon: <Search className="h-6 w-6 mr-3" />,
     subsections: [
       {
         id: 'tree-view',
@@ -90,7 +78,6 @@ const sections: Section[] = [
 - Icons indicate data types (e.g., blue for numbers, green for strings).
 
 **Tip:** Use \`+\` and \`-\` keys to expand or collapse nodes quickly.`,
-        icon: <Layers className="h-6 w-6 mr-3" />,
       },
       {
         id: 'grid-view',
@@ -103,7 +90,6 @@ const sections: Section[] = [
 - Right-click cells to copy, filter, or perform calculations (sum, average).
 
 **Note:** For large datasets, Grid View displays up to **100,000 rows**.`,
-        icon: <Grid className="h-6 w-6 mr-3" />,
       },
       {
         id: 'search',
@@ -115,7 +101,6 @@ const sections: Section[] = [
 - Click a result to navigate to its location.
 
 **Tip:** Use **Search within results** to refine complex queries.`,
-        icon: <Search className="h-6 w-6 mr-3" />,
       },
     ],
   },
@@ -123,7 +108,6 @@ const sections: Section[] = [
     id: 'data-management',
     title: 'Data Management',
     description: "Manage your datasets effectively within Indexr:",
-    icon: <Settings className="h-6 w-6 mr-3" />,
     subsections: [
       {
         id: 'upload-dataset',
@@ -136,7 +120,6 @@ const sections: Section[] = [
 4. Click **Upload** to start.
 
 _Indexr analyzes your data for efficient exploration. Large files may take a few minutes._`,
-        icon: <BookOpen className="h-6 w-6 mr-3" />,
       },
       {
         id: 'supported-formats',
@@ -146,7 +129,6 @@ _Indexr analyzes your data for efficient exploration. Large files may take a few
 - **JSONL (.jsonl):** Line-delimited JSON.
 
 **Coming soon:** Support for Excel (.xlsx) and Parquet (.parquet) files.`,
-        icon: <File className="h-6 w-6 mr-3" />,
       },
       {
         id: 'dataset-visibility',
@@ -162,7 +144,6 @@ _To change visibility settings:_
 1. Go to the dataset's **Settings** page.
 2. Under **Visibility**, select an option.
 3. For **Shared** datasets, enter the email addresses of invitees.`,
-        icon: <Lock className="h-6 w-6 mr-3" />,
       },
     ],
   },
@@ -170,7 +151,6 @@ _To change visibility settings:_
     id: 'features',
     title: 'Advanced Features',
     description: "Enhance your data analysis with these advanced tools:",
-    icon: <PieChart className="h-6 w-6 mr-3" />,
     subsections: [
       {
         id: 'raw-data-view',
@@ -183,7 +163,6 @@ _To change visibility settings:_
 4. Use **Load More** for additional data chunks.
 
 **Tip:** Use Raw Data View to identify data quality issues or unexpected structures.`,
-        icon: <Code className="h-6 w-6 mr-3" />,
       },
       {
         id: 'auto-tagging',
@@ -196,7 +175,6 @@ _To change visibility settings:_
 4. Review and edit tags as needed.
 
 **Note:** Works best with datasets that have clear categories or consistent structures.`,
-        icon: <Tag className="h-6 w-6 mr-3" />,
       },
       {
         id: 'recent-datasets',
@@ -209,7 +187,6 @@ _To change visibility settings:_
 - Pin important datasets to keep them at the top.
 
 _Indexr tracks your 20 most recent datasets for easy access._`,
-        icon: <Clock className="h-6 w-6 mr-3" />,
       },
       {
         id: 'data-visualization',
@@ -223,21 +200,11 @@ _Indexr tracks your 20 most recent datasets for easy access._`,
 5. Export as an image or interactive HTML.
 
 **Note:** Supports numerical and categorical data up to **1 million rows**.`,
-        icon: <BarChart className="h-6 w-6 mr-3" />,
       },
     ],
   },
 ];
 
-// Import additional icons used in the sections
-import {
-  File,
-  Lock,
-  Code,
-  Tag,
-  Clock,
-  BarChart,
-} from 'lucide-react';
 
 /**
  * Custom hook to manage expanded sections and scrolling for the help sections.
@@ -281,7 +248,7 @@ const Description: React.FC<DescriptionProps> = ({ text }) => {
   }), []);
 
   return (
-    <div className="description text-gray-300 text-sm leading-relaxed mt-2">
+    <div className="description text-sm leading-relaxed mt-2">
       <ReactMarkdown components={markdownComponents}>
         {text}
       </ReactMarkdown>
@@ -303,7 +270,6 @@ const HelpSection: React.FC<{ id: string }> = ({ id }) => {
     <>
       <div id={id} className="space-y-4 mb-8">
         <h2 className="text-2xl font-bold flex items-center">
-          {content.icon}
           {content.title}
         </h2>
         {content.description && <Description text={content.description} />}

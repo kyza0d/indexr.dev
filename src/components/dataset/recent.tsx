@@ -92,6 +92,7 @@ export function RecentDatasets() {
   return (
     <>
       <Separator className="mb-4" orientation="horizontal" />
+      <h3 className="text-sm font-semibold px-2 mb-2">Recents</h3>
       <div className="space-y-2">
         {datasets.map((dataset) => (
           <DatasetItem key={dataset.id} dataset={dataset} onClick={handleDatasetClick} />
@@ -137,9 +138,9 @@ const DatasetItem: React.FC<DatasetItemProps> = ({ dataset, onClick }) => {
       </div>
       <div className="ml-auto">
         {dataset.isPublic ? (
-          <Globe className="h-4 w-4 text-green-500" aria-label="Public dataset" />
+          <Globe className="h-4 w-4 text-blue-500" aria-label="Public dataset" />
         ) : (
-          <Lock className="h-4 w-4 text-yellow-500" aria-label="Private dataset" />
+          <Lock className="h-4 w-4 text-blue-500" aria-label="Private dataset" />
         )}
       </div>
     </Button>

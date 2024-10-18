@@ -10,8 +10,8 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 88%;
+    --primary-foreground: 0 0% 40%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
@@ -29,17 +29,31 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --type-number: 201 90% 60%;
+    --type-boolean: 142 76% 45%;
+    --type-date: 32 95% 60%;
+    --type-email: 262 83% 58%;
+    --type-currency: 164 95% 43%;
+    --type-percentage: 326 100% 60%;
+    --type-array: 231 86% 65%;
+    --type-object: 17 92% 80%;
+    --type-null: 0 84% 60%;
+    --type-empty: 220 14% 80%;
+    --type-unknown: 30 100% 60%;
+    --type-bigint: 187 100% 42%;
+    --type-regex: 88 77% 55%;
+    --type-text: 215 25% 60%;
   }
 
   .dark {
     --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --foreground: 0 0% 86%;
     --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0% 92%;
     --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 70%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
@@ -56,6 +70,20 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --type-number: 200 60% 65%;
+    --type-boolean: 140 50% 50%;
+    --type-date: 30 65% 65%;
+    --type-email: 260 55% 60%;
+    --type-currency: 165 65% 48%;
+    --type-percentage: 325 70% 65%;
+    --type-array: 200 10% 45%;
+    --type-object: 200 10% 45%;
+    --type-null: 0 70% 65%;
+    --type-empty: 220 10% 30%;
+    --type-unknown: 30 70% 65%;
+    --type-bigint: 185 70% 48%;
+    --type-regex: 90 50% 60%;
+    --type-text: 215 10% 65%;
   }
 }
 
@@ -66,6 +94,10 @@
 
   body {
     @apply bg-neutral-200 dark:bg-background text-foreground;
+  }
+
+  pre {
+    font-family: var(--font-mono);
   }
 
   mark {

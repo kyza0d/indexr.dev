@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { IndexItem, Dataset, ExampleDataset } from '@/types';
 import { buildTreeData, buildGridData, countTotalItems } from '@/lib/data-processing';
 import { createSearchFunction } from '@/lib/search';
+import { normalizeData } from '@/lib/data-processing'; // Client-side normalization
 
 export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
   const [dataset, setDataset] = useState<Dataset | ExampleDataset>(initialDataset);
@@ -20,40 +21,29 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
       let normalizedData: IndexItem[];
       let rawDataContent: string;
 
-      if ('getData' in dataset) {
-        if (!dataset.getData) {
-          throw new Error('Dataset does not have a getData function');
-        }
-        normalizedData = await dataset.getData();
-        rawDataContent = JSON.stringify(normalizedData, null, 2);
-      } else {
-        const fetchOptions = { credentials: 'omit' as RequestCredentials };
+      const fetchOptions = { credentials: 'omit' as RequestCredentials };
 
-        const [normalizedResponse, rawResponse] = await Promise.all([
-          fetch(`/api/datasets/${dataset.id}/data`, fetchOptions),
-          fetch(`/api/datasets/${dataset.id}/data?raw=true`, fetchOptions),
-        ]);
+      const rawResponse = await fetch(`/api/datasets/${dataset.id}/data?raw=true`, fetchOptions);
 
-        if (!normalizedResponse.ok || !rawResponse.ok) {
-          let errorMessage = 'Failed to fetch data';
+      if (!rawResponse.ok) {
+        let errorMessage = 'Failed to fetch data';
 
-          try {
-            const errorData = await normalizedResponse.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch (e) {
-            // If parsing JSON fails, keep the default error message
-            console.error('Failed to parse error response as JSON:', e);
-          }
-
-          throw new Error(errorMessage);
+        try {
+          const errorData = await rawResponse.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response as JSON:', e);
         }
 
-        normalizedData = await normalizedResponse.json();
-        rawDataContent = await rawResponse.text();
+        throw new Error(errorMessage);
       }
 
-      setData(normalizedData);
+      rawDataContent = await rawResponse.text();
       setRawData(rawDataContent);
+
+      // Perform normalization on the client side
+      normalizedData = await normalizeData(rawDataContent, dataset.fileType);
+      setData(normalizedData);
       setTotalItems(countTotalItems(normalizedData));
 
     } catch (err) {

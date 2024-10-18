@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@
 import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils"
 import { useDatasetSearch } from './dataset-search-context'
+import { Input } from '@/components/ui/input';
 
 type Tag = {
   id: string
@@ -139,12 +140,12 @@ export function TagCompletionSearchBar() {
 
   return (
     <div className="w-full max-w-2xl">
-      <div className="flex items-center p-2 border rounded-md relative">
+      <div className="flex items-center p-2 border rounded-md relative bg-background">
         {/* Search Icon */}
         <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
 
         {/* Tag Input Area */}
-        <div className="flex flex-wrap items-center gap-2 w-full pl-10">
+        <div className="flex flex-wrap items-center gap-2 w-full pl-8">
           {/* Render Selected Tags */}
           {selectedTags.map((tag) => (
             <div key={tag} className="flex items-center bg-primary text-primary-foreground px-2 py-1 rounded-md">
@@ -159,7 +160,7 @@ export function TagCompletionSearchBar() {
           ))}
 
           {/* Input Field */}
-          <input
+          <Input
             ref={inputRef}
             type="text"
             placeholder="Search datasets... (Use # for tags, _ for spaces in tags)"
@@ -174,7 +175,7 @@ export function TagCompletionSearchBar() {
       {/* Suggestions Dropdown */}
       {suggestionsOpen && (
         <div className="relative mt-2">
-          <div className="absolute z-10 w-full bg-background border rounded-md shadow-md">
+          <div className="absolute z-10 w-full bg-background border rounded-md">
             <Command>
               <CommandList>
                 {loading && <CommandItem disabled>Loading...</CommandItem>}

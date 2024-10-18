@@ -12,7 +12,6 @@ import {
   Table,
   Search,
   Menu as MenuIcon,
-  Save as SaveIcon,
 } from 'lucide-react'
 import { Virtuoso } from 'react-virtuoso'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -20,7 +19,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { useMediaQuery } from 'react-responsive'
 
 import { TreeView } from '@/components/data/tree-view'
-import { GridView } from '@/components/data/grid-view'
+import GridView from '@/components/data/grid-view'
 import { SearchBar } from '@/components/search/search-bar'
 import { SearchResult } from '@/components/search/search-result'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -39,8 +38,6 @@ import {
   Sheet,
   SheetTrigger,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
 } from '@/components/ui/sheet'
 
 interface DataExplorerProps {
@@ -70,10 +67,10 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
 
   const handleSearch = useCallback(
     (term: string) => {
-      setSearchTerm(term)
+      setSearchTerm(term.length > 1 ? term : '');
     },
     [setSearchTerm]
-  )
+  );
 
   const handleSaveToggle = useCallback(
     async (isSaved: boolean) => {
@@ -129,7 +126,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
   return (
     <TreeProvider currentView={currentView}>
       <GridProvider currentView={currentView}>
-        <div className="flex flex-col h-[86vh]">
+        <div className="flex flex-col h-[96vh]">
           <PanelGroup
             direction={isSmallScreen ? 'vertical' : 'horizontal'}
             className="flex-grow relative"
@@ -251,7 +248,6 @@ interface DatasetHeaderProps {
 }
 
 function DatasetHeader({
-  dataset,
   isOwner,
   searchTerm,
   onSearch,
@@ -306,7 +302,6 @@ function DataTabs({
   gridData,
   isOwner,
   onSaveToggle,
-  isSmallScreen,
 }: DataTabsProps) {
   return (
     <Tabs
@@ -390,8 +385,6 @@ function MobileMenu({
   isOwner,
   searchTerm,
   onSearch,
-  searchResults,
-  totalItems,
   currentView,
   setCurrentView,
   setShowRawData,
@@ -460,7 +453,6 @@ interface SearchResultsPanelProps {
 function SearchResultsPanel({
   searchResults,
   ItemRenderer,
-  fileType,
 }: SearchResultsPanelProps) {
   return (
     <div className="h-full flex flex-col">
@@ -469,7 +461,7 @@ function SearchResultsPanel({
           <AutoSizer>
             {({ width }) => (
               <Virtuoso
-                style={{ width, height: '83vh', padding: '0 0.5rem' }}
+                style={{ width, height: '96vh', padding: '0 0.5rem' }}
                 className="bg-background"
                 overscan={200}
                 totalCount={searchResults.length}

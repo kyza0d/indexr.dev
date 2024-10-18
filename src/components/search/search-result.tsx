@@ -78,7 +78,7 @@ export const SearchResult: React.FC<SearchResultProps> = React.memo(({ result, s
   }, []);
 
   return (
-    <div className={`group py-2 ${depth > 0 ? 'ml-4' : ''} ${isDirectoryMatch ? 'bg-secondary/20 p-2 rounded' : ''}`}>
+    <div className={`group py-2 mx-2 ${depth > 0 ? 'ml-4' : ''} ${isDirectoryMatch ? 'bg-secondary/20 p-2 rounded' : ''}`}>
 
       <div className="flex items-center whitespace-nowrap overflow-ellipsis">
         {(hasNestedItems || isDirectoryMatch) && (

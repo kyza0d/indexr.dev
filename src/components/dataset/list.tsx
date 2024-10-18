@@ -1,7 +1,7 @@
 import { fetchDatasets } from '@/actions/dataset'
 import { DatasetListClient } from '@/components/dataset/list-client'
 
-export async function DatasetList() {
+export async function DatasetList({ minimal }: { minimal?: boolean }) {
   const { error } = await fetchDatasets()
 
   if (error) {
@@ -10,6 +10,6 @@ export async function DatasetList() {
   }
 
   return (
-    <DatasetListClient />
+    <DatasetListClient minimal={minimal} />
   )
 }

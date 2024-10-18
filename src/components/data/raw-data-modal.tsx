@@ -87,7 +87,7 @@ export const RawDataModal: React.FC<RawDataModalProps> = ({ isOpen, onClose, dat
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{datasetName} - Raw Data</DialogTitle>
         </DialogHeader>

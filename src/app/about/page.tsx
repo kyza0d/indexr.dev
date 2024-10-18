@@ -64,13 +64,6 @@ export default function AboutPage() {
           </ul>
         </CardContent>
       </Card>
-
-      <div className="mt-8 text-center">
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          <Zap className="inline-block mr-2 h-5 w-5" />
-          Start exploring your data with Indexr today!
-        </Badge>
-      </div>
     </div>
   )
 }

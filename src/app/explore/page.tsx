@@ -8,16 +8,16 @@ export const revalidate = 60;
 export default function ExplorePage() {
   return (
     <DatasetSearchProvider>
-      <div className="mx-auto px-4">
+      <div className="mx-auto">
         <div className="flex flex-col gap-8">
-          <div className="w-full">
+          <div className="w-full mt-12">
             <Suspense fallback={<div>Loading search bar...</div>}>
               <TagCompletionSearchBar />
             </Suspense>
           </div>
           <main className="w-full">
             <Suspense fallback={<div>Loading dataset list...</div>}>
-              <DatasetList />
+              <DatasetList minimal={true} />
             </Suspense>
           </main>
         </div>

@@ -104,7 +104,7 @@ const TreeViewNode: React.FC<TreeViewNodeProps> = React.memo(
     return (
       <div
         style={{ paddingLeft: `${node.depth * 20}px` }}
-        className={`flex items-center p-2 rounded-md mx-2 ${isHighlighted ? 'bg-primary/10' : ''} transition-colors duration-300`}
+        className={`flex items-center p-2 rounded-md mx-2 ${isHighlighted ? 'bg-primary' : ''} transition-colors duration-300`}
       >
         {hasChildren ? (
           <button onClick={handleToggle} className="p-1 hover:bg-accent rounded-sm">

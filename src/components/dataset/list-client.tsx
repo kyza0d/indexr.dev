@@ -11,7 +11,7 @@ import { useDatasetSearch } from './dataset-search-context'
 import { useDatasets } from '@/hooks/use-datasets'
 import { useSession } from 'next-auth/react'
 
-export function DatasetListClient() {
+export function DatasetListClient({ minimal }: { minimal?: boolean }) {
   const router = useRouter()
   const { query, tags } = useDatasetSearch()
   const [page, setPage] = useState(1)
@@ -46,10 +46,8 @@ export function DatasetListClient() {
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-200px)]">
+    <ScrollArea className="h-[96vh]">
       <div className="mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-8">Datasets</h1>
-
         <Filters />
 
         {datasets.length === 0 ? (
@@ -68,6 +66,7 @@ export function DatasetListClient() {
                   savingId={null}
                   deletingId={null}
                   onView={handleView}
+                  minimal={minimal}
                 />
               )
             })}

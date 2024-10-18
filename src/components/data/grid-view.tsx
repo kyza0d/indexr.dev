@@ -46,11 +46,21 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
   const sortedData = useMemo(() => {
     if (sortConfig.key && sortConfig.direction && sortConfig.key !== 'rowIndex') {
       return [...initialData].sort((a, b) => {
-        const aValue = a[sortConfig.key] ?? '';
-        const bValue = b[sortConfig.key] ?? '';
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        const aNum = Number(aValue);
+        const bNum = Number(bValue);
+
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return sortConfig.direction === 'asc' ? bNum - aNum : aNum - bNum;
+        } else {
+          const aString = String(aValue ?? '').toLowerCase();
+          const bString = String(bValue ?? '').toLowerCase();
+          return sortConfig.direction === 'asc'
+            ? aString.localeCompare(bString)
+            : bString.localeCompare(aString);
+        }
       });
     }
     return initialData;
@@ -122,6 +132,7 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
         totalCount={rowCount}
         overscan={200}
         components={components}
+        className="border rounded-md mt-2"
         fixedHeaderContent={renderHeader}
         itemContent={renderRow}
         style={{ height: '80vh' }}
@@ -130,12 +141,6 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
   );
 };
 
-/**
- * Custom hook to process grid data, including columns, headers, and total width.
- * @param data - The sorted data array.
- * @param columnWidths - The current column widths.
- * @returns An object containing columns, headers, rowCount, and totalWidth.
- */
 const useGridData = (
   data: GridDataItem[],
   columnWidths: Record<string, number>
@@ -224,15 +229,6 @@ const useRenderRow = (
   );
 };
 
-/**
- * Custom hook to render the table header.
- * @param headers - The array of header names.
- * @param columns - The columns data.
- * @param sortConfig - The current sort configuration.
- * @param handleSort - Function to handle sorting.
- * @param handleColumnMouseDown - Function to handle column resizing.
- * @returns A function that renders the table header.
- */
 const useRenderHeader = (
   headers: string[],
   columns: Record<string, ColumnData>,
@@ -275,7 +271,7 @@ const useRenderHeader = (
                     <GoTriangleUp
                       size={14}
                       className={`
-                        ${isSorted && sortConfig.direction === 'asc' ? 'text-foreground' : 'text-muted-foreground'}
+                        ${isSorted && sortConfig.direction === 'asc' ? 'text-foreground' : 'text-muted-foreground/35'}
                         ${!isSorted && 'opacity-0 group-hover:opacity-100'}
                         transition-opacity
                       `}
@@ -283,7 +279,7 @@ const useRenderHeader = (
                     <GoTriangleDown
                       size={14}
                       className={`
-                        ${isSorted && sortConfig.direction === 'desc' ? 'text-foreground' : 'text-muted-foreground'}
+                        ${isSorted && sortConfig.direction === 'desc' ? 'text-foreground' : 'text-muted-foreground/35'}
                         ${!isSorted && 'opacity-0 group-hover:opacity-100'}
                         transition-opacity
                       `}
@@ -306,10 +302,6 @@ const useRenderHeader = (
   );
 };
 
-/**
- * Returns customized Virtuoso components with proper types.
- * @returns An object containing Virtuoso components.
- */
 const getVirtuosoComponents = () => ({
   Table: (props: React.HTMLProps<HTMLTableElement>) => (
     <table
@@ -332,12 +324,6 @@ const getVirtuosoComponents = () => ({
   ),
 });
 
-/**
- * Custom hook to render a table cell.
- * @param columns - The columns data.
- * @param activeRowIndex - The index of the active row.
- * @returns A function that renders a cell.
- */
 const useRenderCell = (
   columns: Record<string, ColumnData>,
   activeRowIndex: number | null
@@ -353,7 +339,7 @@ const useRenderCell = (
       const isRowIndex = header === 'rowIndex';
 
       const cellClassNames = [
-        'border-b px-6 py-4 whitespace-nowrap text-sm text-muted-foreground transition-colors duration-300',
+        'border-b py-4 whitespace-nowrap text-sm text-muted-foreground transition-colors duration-300',
         isActive && 'bg-accent/60',
         isRowIndex && 'sticky left-0 bg-background before:content-[""] before:absolute before:-z-10 before:border-r before:bg-background before:border-border before:inset-0',
       ]

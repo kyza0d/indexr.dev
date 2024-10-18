@@ -10,7 +10,7 @@ import { Bookmark } from 'lucide-react';
 
 export function DataExplorerSkeleton() {
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col h-[96vh]">
       <PanelGroup direction="horizontal" className="flex-grow relative">
         <div className="absolute w-full">
           <div className="flex items-center justify-end space-x-2">

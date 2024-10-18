@@ -8,20 +8,27 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   safelist: [
-    'text-blue-500',
-    'text-green-500',
-    'text-orange-500',
-    'text-purple-500',
-    'text-pink-500',
-    'text-teal-500',
-    'text-yellow-500',
-    'text-indigo-500',
-    'text-red-500',
-    'text-gray-500',
-    'text-gray-300',
+    'text-[hsl(var(--type-number))]',
+    'text-[hsl(var(--type-boolean))]',
+    'text-[hsl(var(--type-date))]',
+    'text-[hsl(var(--type-email))]',
+    'text-[hsl(var(--type-currency))]',
+    'text-[hsl(var(--type-percentage))]',
+    'text-[hsl(var(--type-array))]',
+    'text-[hsl(var(--type-object))]',
+    'text-[hsl(var(--type-null))]',
+    'text-[hsl(var(--type-empty))]',
+    'text-[hsl(var(--type-unknown))]',
+    'text-[hsl(var(--type-bigint))]',
+    'text-[hsl(var(--type-regex))]',
+    'text-[hsl(var(--type-text))]',
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'

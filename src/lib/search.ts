@@ -2,6 +2,12 @@ import Fuse from 'fuse.js';
 import { IndexItem, Dataset } from '@/types';
 
 function flattenIndexItems(items: IndexItem[]): IndexItem[] {
+  // Ensure items is an array
+  if (!Array.isArray(items)) {
+    console.error('Expected an array of IndexItem, but received:', items);
+    return [];
+  }
+
   const flattened: IndexItem[] = [];
 
   function flatten(item: IndexItem, parentPath: string[] = []) {
@@ -13,7 +19,7 @@ function flattenIndexItems(items: IndexItem[]): IndexItem[] {
     };
     flattened.push(flatItem);
 
-    if (item.children) {
+    if (item.children && item.children.length > 0) {
       item.children.forEach((child) => flatten(child, currentPath));
     }
   }
@@ -25,6 +31,12 @@ function flattenIndexItems(items: IndexItem[]): IndexItem[] {
 const FUSE_THRESHOLD = 1000; // Adjust this value based on your performance tests
 
 export function createSearchFunction(data: IndexItem[]) {
+  // Ensure data is an array
+  if (!Array.isArray(data)) {
+    console.error('Expected an array of IndexItem for search function, but received:', data);
+    return () => [];
+  }
+
   const flattenedData = flattenIndexItems(data);
 
   if (flattenedData.length < FUSE_THRESHOLD) {
@@ -61,7 +73,7 @@ export function searchDatasets(datasets: Dataset[], query: string): Dataset[] {
   if (!query) return datasets;
 
   const options = {
-    keys: ['name', 'description'], // Replace with actual Dataset properties
+    keys: ['name', 'description'],
     threshold: 0.4,
     includeMatches: true,
     ignoreLocation: true,

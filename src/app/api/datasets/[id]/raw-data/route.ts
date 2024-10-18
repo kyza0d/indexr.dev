@@ -21,7 +21,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const page = parseInt(searchParams.get('page') || '1', 10);
     const search = searchParams.get('search') || '';
 
-    console.log('Fetching dataset with id:', id);
     const dataset = await prisma.dataset.findUnique({
       where: { id },
       select: {

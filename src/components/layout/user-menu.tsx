@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTheme } from "next-themes"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,9 +15,41 @@ import { Settings, LogOut, Moon, Sun } from 'lucide-react'
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from 'next/link'
 
-export default function UserMenu() {
-  const { data: session } = useSession()
+const ThemeToggle = () => {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // This effect ensures the component waits until the client has rendered
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null // Avoid rendering on the server-side
+
+  return (
+    <Tabs
+      value={theme} // Set the current theme as the active tab
+      onValueChange={(value) => setTheme(value)} // Change theme when tab is selected
+      className="w-full"
+    >
+      <TabsList className="flex  justify-between w-full">
+        <TabsTrigger value="light" className="flex items-center gap-2 w-1/2">
+          <Sun className="h-5 w-5" />
+          <span>Light</span>
+        </TabsTrigger>
+        <TabsTrigger value="dark" className="flex items-center gap-2 w-1/2">
+          <Moon className="h-5 w-5" />
+          <span>Dark</span>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  )
+}
+
+export default ThemeToggle
+
+function UserMenu() {
+  const { data: session } = useSession()
 
   if (!session) {
     return (
@@ -27,14 +60,15 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="outline" className="relative w-full space-x-2 justify-start px-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={session.user?.image || undefined} alt={session.user?.name || "User"} />
             <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
           </Avatar>
+          <div>{session.user?.email}</div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-[300px]" align="start" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{session.user?.name}</p>
@@ -51,25 +85,15 @@ export default function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => setTheme(theme === "light" ? "dark" : "light")}>
-          {theme === "light" ? (
-            <>
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Dark</span>
-            </>
-          ) : (
-            <>
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Light</span>
-            </>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign out</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <ThemeToggle />
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
+
+export { UserMenu, ThemeToggle }

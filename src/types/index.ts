@@ -42,11 +42,6 @@ export interface GridItem {
   [key: string]: string | number | boolean | null;
 }
 
-export interface ColumnData {
-  values: Array<string | number | boolean | null>;
-  width: number;
-}
-
 export interface Dataset {
   id: string;
   name: string;
@@ -75,3 +70,21 @@ export interface ExampleDataset {
 }
 
 export type FileType = 'application/json' | 'text/csv' | string;
+
+
+// types.ts
+export type SortDirection = 'asc' | 'desc' | '';
+
+export interface SortConfig {
+  key: string;
+  direction: SortDirection;
+}
+
+export interface GridDataItem {
+  originalIndex: number;
+  [key: string]: any; // Allow dynamic properties
+}
+
+export interface GridViewProps {
+  data: GridDataItem[];
+}

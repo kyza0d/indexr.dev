@@ -117,8 +117,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="container mx-auto">
       {error && (
         <div className="bg-destructive text-destructive-foreground p-4 rounded-md mb-6">
           {error}
