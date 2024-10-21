@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { IndexItem, Dataset, ExampleDataset } from '@/types';
 import { buildTreeData, buildGridData, countTotalItems } from '@/lib/data-processing';
 import { createSearchFunction } from '@/lib/search';
@@ -13,15 +13,29 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
   const [searchTerm, setSearchTerm] = useState('');
   const [totalItems, setTotalItems] = useState(0);
 
+  // Use useRef instead of useState for the AbortController
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
+    // Abort previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create a new AbortController for this fetch request
+    abortControllerRef.current = new AbortController();
 
     try {
       let normalizedData: IndexItem[];
       let rawDataContent: string;
 
-      const fetchOptions = { credentials: 'omit' as RequestCredentials };
+      const fetchOptions = {
+        credentials: 'omit' as RequestCredentials,
+        signal: abortControllerRef.current.signal
+      };
 
       const rawResponse = await fetch(`/api/datasets/${dataset.id}/data?raw=true`, fetchOptions);
 
@@ -46,16 +60,31 @@ export function useDataExplorer(initialDataset: Dataset | ExampleDataset) {
       setData(normalizedData);
       setTotalItems(countTotalItems(normalizedData));
 
-    } catch (err) {
+      // Set loading to false after normalization is complete
+      setIsLoading(false);
+
+    } catch (err: Error | any) {
+      if (err.name === 'AbortError') {
+        console.log('Fetch aborted');
+        return; // Don't set error state for aborted requests
+      }
       console.error('Error fetching data:', err);
       setError((err as Error).message);
+      setIsLoading(false); // Ensure loading is set to false even if there's an error
     } finally {
-      setIsLoading(false);
+      abortControllerRef.current = null;
     }
   }, [dataset]);
 
   useEffect(() => {
     fetchData();
+
+    // Cleanup function to abort fetch if component unmounts or dataset changes
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [fetchData]);
 
   const treeData = useMemo(() => buildTreeData(data), [data]);

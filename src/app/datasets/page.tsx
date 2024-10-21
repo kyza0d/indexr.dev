@@ -2,31 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserDatasetList } from '@/components/dataset/user-list';
-import { fetchDatasets } from '@/actions/dataset';
+import { fetchUserDatasets } from '@/actions/dataset';
 import { Loader2 } from 'lucide-react';
 import { Dataset } from '@/types';
 
 export default function DatasetsPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadDatasets = async () => {
     setIsLoading(true);
     try {
-      const { datasets: fetchedDatasets, error } = await fetchDatasets();
+      const { datasets: fetchedDatasets, error } = await fetchUserDatasets();
       if (error) {
-        throw new Error(error);
+        setError(error);
+      } else {
+        setDatasets(fetchedDatasets);
+        setError(null);
       }
-      // Transform fetchedDatasets to match Dataset type
-      const transformedDatasets: Dataset[] = fetchedDatasets.map(dataset => ({
-        ...dataset,
-        isSaved: false, // Set a default value or implement logic to determine if saved
-        createdAt: dataset.createdAt.toISOString(),
-        updatedAt: dataset.updatedAt.toISOString(),
-      }));
-      setDatasets(transformedDatasets);
     } catch (error) {
       console.error('Error fetching datasets:', error);
+      setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -40,15 +37,25 @@ export default function DatasetsPage() {
     loadDatasets();
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {isLoading ? (
-        <div className="flex justify-center items-center h-screen">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : (
-        <UserDatasetList datasets={datasets} onDatasetDeleted={handleDatasetDeleted} />
-      )}
+      <UserDatasetList datasets={datasets} onDatasetDeleted={handleDatasetDeleted} />
     </div>
   );
 }

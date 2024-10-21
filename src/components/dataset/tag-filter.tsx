@@ -31,6 +31,8 @@ export function DatasetTagFilter({ allTags }: DatasetTagFilterProps) {
       const updatedSearchParams = new URLSearchParams(Array.from(searchParams.entries()))
       const tags = updatedSearchParams.getAll('tag')
 
+      console.log('Before change - Selected tags:', tags);
+
       if (checked && !tags.includes(tag)) {
         updatedSearchParams.append('tag', tag)
       } else if (!checked) {
@@ -41,6 +43,7 @@ export function DatasetTagFilter({ allTags }: DatasetTagFilterProps) {
 
       const search = updatedSearchParams.toString()
       const query = search ? `?${search}` : ''
+      console.log('After change - Updated search query:', query);
       router.push(`/explore${query}`)
     },
     [searchParams, router]

@@ -175,7 +175,6 @@ export default function Dashboard() {
                 key={dataset.id}
                 dataset={dataset}
                 isOwner={dataset.userId === session?.user?.id}
-                onView={handleView}
                 onSave={handleSave}
                 onDelete={handleDelete}
                 savingId={savingId}

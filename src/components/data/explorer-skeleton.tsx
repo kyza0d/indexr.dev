@@ -35,7 +35,7 @@ export function DataExplorerSkeleton() {
                 <Skeleton className="h-4 w-20" />
               </Button>
             </div>
-            <TabsContent value="tree" className="flex-grow mt-2 rounded-lg overflow-hidden border bg-background" style={{ height: '80dvh' }}>
+            <TabsContent value="tree" className="flex-grow mt-2 rounded-lg overflow-hidden border bg-background" style={{ height: '90dvh' }}>
               <div className="h-full w-full">
                 <TreeViewSkeleton />
               </div>
@@ -55,7 +55,7 @@ export function DataExplorerSkeleton() {
 function TreeViewSkeleton() {
   return (
     <div className="space-y-3">
-      {[...Array(18)].map((_, i) => (
+      {[...Array(22)].map((_, i) => (
         <div key={i} className="flex items-center space-x-2 mt-2 mx-2">
           <Skeleton className="h-8 w-7" />
           <Skeleton className="h-8 w-11" />

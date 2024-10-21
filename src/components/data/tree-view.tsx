@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { TreeNode } from '@/types';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { getIcon } from '@/lib/type-icon';
@@ -65,22 +64,17 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
   );
 
   return (
-
-    <AutoSizer>
-      {({ height, width }) => (
-        <Virtuoso<FlattenedTreeNode>
-          ref={virtualListRef as React.RefObject<VirtuosoHandle>}
-          style={{ height, width }}
-          totalCount={flattenedData.length}
-          itemContent={rowRenderer}
-          followOutput={followOutput}
-          isScrolling={(scrolling) => setIsScrolling(scrolling)}
-          overscan={300}
-          increaseViewportBy={{ top: 500, bottom: 500 }}
-          data={flattenedData}
-        />
-      )}
-    </AutoSizer>
+    <Virtuoso<FlattenedTreeNode>
+      ref={virtualListRef as React.RefObject<VirtuosoHandle>}
+      totalCount={flattenedData.length}
+      itemContent={rowRenderer}
+      className="border-t"
+      followOutput={followOutput}
+      isScrolling={(scrolling) => setIsScrolling(scrolling)}
+      overscan={300}
+      increaseViewportBy={{ top: 500, bottom: 500 }}
+      data={flattenedData}
+    />
   );
 };
 

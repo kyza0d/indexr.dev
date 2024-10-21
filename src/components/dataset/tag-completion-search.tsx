@@ -175,7 +175,7 @@ export function TagCompletionSearchBar() {
       {/* Suggestions Dropdown */}
       {suggestionsOpen && (
         <div className="relative mt-2">
-          <div className="absolute z-10 w-full bg-background border rounded-md">
+          <div className="absolute z-10 bg-background border rounded-md">
             <Command>
               <CommandList>
                 {loading && <CommandItem disabled>Loading...</CommandItem>}

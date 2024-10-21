@@ -125,19 +125,16 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
   }
 
   return (
-    <div className="rounded-lg shadow-md bg-background">
-      <TableVirtuoso
-        ref={virtualListRef}
-        data={sortedData}
-        totalCount={rowCount}
-        overscan={200}
-        components={components}
-        className="border rounded-md mt-2"
-        fixedHeaderContent={renderHeader}
-        itemContent={renderRow}
-        style={{ height: '80vh' }}
-      />
-    </div>
+    <TableVirtuoso
+      ref={virtualListRef}
+      data={sortedData}
+      totalCount={rowCount}
+      overscan={200}
+      components={components}
+      className="border-t"
+      fixedHeaderContent={renderHeader}
+      itemContent={renderRow}
+    />
   );
 };
 
@@ -339,9 +336,9 @@ const useRenderCell = (
       const isRowIndex = header === 'rowIndex';
 
       const cellClassNames = [
-        'border-b py-4 whitespace-nowrap text-sm text-muted-foreground transition-colors duration-300',
+        'border-b pl-4 py-4 whitespace-nowrap text-sm text-muted-foreground transition-colors duration-300',
         isActive && 'bg-accent/60',
-        isRowIndex && 'sticky left-0 bg-background before:content-[""] before:absolute before:-z-10 before:border-r before:bg-background before:border-border before:inset-0',
+        isRowIndex && 'sticky left-0 bg-muted before:content-[""] before:absolute before:-z-10 before:border-r before:bg-background before:border-border before:inset-0',
       ]
         .filter(Boolean)
         .join(' ');

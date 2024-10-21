@@ -41,6 +41,24 @@ const config: Config = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        colors: {
+          type: {
+            number: 'hsl(var(--type-number))',
+            boolean: 'hsl(var(--type-boolean))',
+            date: 'hsl(var(--type-date))',
+            email: 'hsl(var(--type-email))',
+            currency: 'hsl(var(--type-currency))',
+            percentage: 'hsl(var(--type-percentage))',
+            array: 'hsl(var(--type-array))',
+            object: 'hsl(var(--type-object))',
+            null: 'hsl(var(--type-null))',
+            empty: 'hsl(var(--type-empty))',
+            unknown: 'hsl(var(--type-unknown))',
+            bigint: 'hsl(var(--type-bigint))',
+            regex: 'hsl(var(--type-regex))',
+            text: 'hsl(var(--type-text))',
+          },
+        },
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'

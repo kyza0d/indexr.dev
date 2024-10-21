@@ -14,12 +14,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-const navItems = [
-  { icon: Columns2, label: 'Viewer', href: '/viewer' },
-  { icon: List, label: 'Datasets', href: '/datasets' },
-  { icon: Search, label: 'Explore', href: '/explore' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
-]
 
 interface SidebarProps {
   isExpanded: boolean
@@ -31,7 +25,13 @@ export default function Sidebar({ isExpanded = true, onToggle = () => { } }: Sid
   const [isHelpOpen, setIsHelpOpen] = useState(false)
   const [uploadDatasetDialogOpen, setUploadDatasetDialogOpen] = useState(false)
   const { data: session } = useSession()
-  const router = useRouter()
+
+  const navItems = [
+    { icon: Columns2, label: 'Viewer', href: '/viewer' },
+    { icon: Search, label: 'Explore', href: '/explore' },
+    ...(session ? [{ icon: List, label: 'Datasets', href: '/datasets' }] : []),
+    { icon: Settings, label: 'Settings', href: '/settings' },
+  ]
 
   const handleUploadSuccess = () => {
     setUploadDatasetDialogOpen(false)

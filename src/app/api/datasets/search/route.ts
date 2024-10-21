@@ -54,16 +54,19 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Tags filter
+    // Tags filter - ensure ALL requested tags are present
     if (tags.length > 0) {
       whereConditions.push({
-        tags: {
-          some: {
-            name: {
-              in: tags,
-            },
-          },
-        },
+        AND: tags.map(tag => ({
+          tags: {
+            some: {
+              name: {
+                equals: tag,
+                mode: Prisma.QueryMode.insensitive,
+              }
+            }
+          }
+        }))
       });
     }
 

@@ -11,7 +11,6 @@ import React, {
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Dataset } from '@/types'
 
-
 interface DatasetSearchContextType {
   query: string
   tags: string[]
@@ -65,6 +64,7 @@ function DatasetSearchProviderContent({ children }: { children: React.ReactNode 
     setTags([])
   }, [])
 
+
   useEffect(() => {
     const filtered = datasets.filter((dataset) => {
       const matchesQuery =
@@ -72,6 +72,7 @@ function DatasetSearchProviderContent({ children }: { children: React.ReactNode 
         (dataset.description ?? '')
           .toLowerCase()
           .includes(query.toLowerCase())
+
       const matchesTags =
         tags.length === 0 ||
         tags.every((tag) =>
@@ -79,14 +80,17 @@ function DatasetSearchProviderContent({ children }: { children: React.ReactNode 
             (t) => t.name.toLowerCase() === tag.toLowerCase()
           )
         )
+
       return matchesQuery && matchesTags
     })
+
     setFilteredDatasets(filtered)
 
     const params = new URLSearchParams()
     if (query) params.set('q', query)
+
     tags.forEach((tag) => params.append('tag', tag))
-    router.push(`/explore?${params.toString()}`)
+    router.push(`/explore?${params.toString()}`, { scroll: false })
   }, [query, tags, datasets, router])
 
   const value = {

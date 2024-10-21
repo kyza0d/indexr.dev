@@ -70,21 +70,3 @@ export interface ExampleDataset {
 }
 
 export type FileType = 'application/json' | 'text/csv' | string;
-
-
-// types.ts
-export type SortDirection = 'asc' | 'desc' | '';
-
-export interface SortConfig {
-  key: string;
-  direction: SortDirection;
-}
-
-export interface GridDataItem {
-  originalIndex: number;
-  [key: string]: any; // Allow dynamic properties
-}
-
-export interface GridViewProps {
-  data: GridDataItem[];
-}

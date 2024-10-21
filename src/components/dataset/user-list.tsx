@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { deleteDataset, saveDataset } from '@/actions/dataset';
 import { useToast } from '@/hooks/use-toast';
@@ -12,16 +11,11 @@ interface UserDatasetListProps {
   onDatasetDeleted: () => void;
 }
 
-export function UserDatasetList({ datasets, onDatasetDeleted }: UserDatasetListProps) {
-  const router = useRouter();
+export const UserDatasetList = ({ datasets, onDatasetDeleted }: UserDatasetListProps) => {
   const { toast } = useToast();
   const { data: session } = useSession();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
-
-  const handleView = (id: string) => {
-    router.push(`/explore/${id}`);
-  };
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
@@ -92,7 +86,6 @@ export function UserDatasetList({ datasets, onDatasetDeleted }: UserDatasetListP
           key={dataset.id}
           dataset={dataset}
           isOwner={dataset.userId === session?.user?.id}
-          onView={handleView}
           onSave={handleSave}
           onDelete={handleDelete}
           savingId={savingId}

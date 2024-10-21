@@ -2,45 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { deleteDataset } from '@/actions/dataset';
+import { cache } from 'react';
+
+const getCachedDataset = cache(async (id: string) => {
+  return await prisma.dataset.findUnique({
+    where: { id },
+    include: {
+      tags: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true, image: true } },
+      savedBy: { select: { userId: true } },
+    },
+  });
+});
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  console.log('Entering GET function for dataset');
   try {
-    // Optional authentication
-    let session = null;
-    try {
-      session = await auth();
-    } catch (error) {
-      // User is not authenticated; proceed without session
-    }
-
+    const session = await auth();
     const userId = session?.user?.id;
     const { id } = params;
-    console.log('Dataset ID to fetch:', id);
 
-    // Fetch the dataset
-    const dataset = await prisma.dataset.findUnique({
-      where: { id },
-      include: {
-        tags: { select: { id: true, name: true } },
-        user: { select: { id: true, name: true, image: true } },
-        savedBy: { select: { userId: true } },
-      },
-    });
+    const dataset = await getCachedDataset(id);
 
     if (!dataset) {
       return NextResponse.json({ error: 'Dataset not found' }, { status: 404 });
     }
 
-    // Authorization logic
-    if (!dataset.isPublic) {
-      // Dataset is private
-      if (!userId || userId !== dataset.userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!dataset.isPublic && (!userId || userId !== dataset.userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Determine if the dataset is saved by the current user
     const isSaved = userId ? dataset.savedBy.some((saved) => saved.userId === userId) : false;
 
     return NextResponse.json({
@@ -60,6 +50,10 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       user: {
         name: dataset.user.name,
         image: dataset.user.image,
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',
       },
     });
   } catch (error) {

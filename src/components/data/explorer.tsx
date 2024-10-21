@@ -12,6 +12,8 @@ import {
   Table,
   Search,
   Menu as MenuIcon,
+  FileSpreadsheet,
+  FileJson2,
 } from 'lucide-react'
 import { Virtuoso } from 'react-virtuoso'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -129,7 +131,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
         <div className="flex flex-col h-[96vh]">
           <PanelGroup
             direction={isSmallScreen ? 'vertical' : 'horizontal'}
-            className="flex-grow relative"
+            className="flex-grow relative border rounded-md bg-primary/70"
           >
             {isSmallScreen ? (
               <>
@@ -145,16 +147,15 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
                   setShowRawData={setShowRawData}
                   onSaveToggle={handleSaveToggle}
                 />
-                <Panel className="mt-2 flex-grow rounded-lg border ">
-                  {currentView === 'tree' ? (
-                    <TreeView data={treeData} />
-                  ) : (
-                    <GridView data={gridData} />
-                  )}
+
+                <Panel className="mt-2 flex-grow">
+                  {currentView === 'tree' ? (<TreeView data={treeData} />) : (<GridView data={gridData} />)}
                 </Panel>
+
                 {searchTerm && (
+
                   <>
-                    <PanelResizeHandle className="bg-neutral-700 h-[1px] mt-2 " />
+                    <PanelResizeHandle className="bg-neutral-700 h-[1px] mt-2 cursor-col-resize " />
                     <Panel defaultSize={40} minSize={20}>
                       <SearchResultsPanel
                         searchResults={searchResults}
@@ -192,7 +193,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
                 </Panel>
                 {searchTerm && (
                   <>
-                    <PanelResizeHandle className="bg-neutral-700 w-[1px] h-full mt-12 mx-2 pt-12" />
+                    <PanelResizeHandle className="bg-border w-[1px] h-full mx-0 mt-16 cursor-col-resize" />
                     <Panel defaultSize={40} minSize={20} className="pt-12">
                       <SearchResultsPanel
                         searchResults={searchResults}
@@ -256,7 +257,7 @@ function DatasetHeader({
   isSmallScreen,
 }: DatasetHeaderProps) {
   return (
-    <div className={`absolute right-0`}>
+    <div className={`absolute right-2`}>
       <div
         className={`flex items-center ${isSmallScreen ? 'justify-between' : 'justify-end'
           } space-x-2`}
@@ -306,20 +307,24 @@ function DataTabs({
   return (
     <Tabs
       defaultValue="tree"
-      className="flex h-full flex-col relative"
+      className="flex h-full flex-col relative z-10"
       onValueChange={(value) => setCurrentView(value as 'tree' | 'grid')}
     >
-      <div className='absolute top-0 left-0 -translate-y-full mt-[1px] space-x-2' >
+      <div className='absolute top-0 left-0 -translate-y-full mt-2 mx-2 space-x-2' >
         <Button
           onClick={() => setShowRawData(true)}
           className="self-start"
           variant="outline"
           aria-label="Show Raw Data"
         >
-          <FileIcon className="mr-2 h-4 w-4" />
+          {dataset.fileType === 'text/csv' ? (
+            <FileSpreadsheet className="h-4 w-4 mr-3" aria-hidden="true" />
+          ) : (
+            <FileJson2 className="h-4 w-4 mr-3" aria-hidden="true" />
+          )}
           {dataset.name.split('.').pop() || 'Dataset'}
         </Button>
-        <TabsList>
+        <TabsList className='absolute'>
           <TabsTrigger value="tree">
             <FolderSearch size={16} className="mr-2" />
             Tree View
@@ -339,30 +344,33 @@ function DataTabs({
           />
         )}
       </div>
-      <TabsContent value="tree" className="flex-grow mt-2">
+
+      <TabsContent value="tree" className="flex-grow mt-4">
         <AutoSizer>
           {({ height, width }) => (
             <div
               style={{ height, width }}
-              className="rounded-lg border bg-background overflow-hidden"
+              className="rounded-lg bg-background"
             >
               <TreeView data={treeData} />
             </div>
           )}
         </AutoSizer>
       </TabsContent>
-      <TabsContent value="grid" className="flex-grow mt-2">
+
+      <TabsContent value="grid" className="flex-grow mt-4">
         <AutoSizer>
           {({ height, width }) => (
             <div
               style={{ height, width }}
-              className="rounded-lg border overflow-hidden"
+              className="rounded-lg bg-background"
             >
               <GridView data={gridData} />
             </div>
           )}
         </AutoSizer>
       </TabsContent>
+
     </Tabs>
   )
 }
@@ -456,13 +464,13 @@ function SearchResultsPanel({
 }: SearchResultsPanelProps) {
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-grow mt-2 border rounded-lg overflow-hidden">
+      <div className="flex-grow mt-4 overflow-hidden">
         {searchResults.length > 0 ? (
           <AutoSizer>
             {({ width }) => (
               <Virtuoso
                 style={{ width, height: '96vh', padding: '0 0.5rem' }}
-                className="bg-background"
+                className="bg-background border-t"
                 overscan={200}
                 totalCount={searchResults.length}
                 itemContent={(index) => (
@@ -478,7 +486,7 @@ function SearchResultsPanel({
             )}
           </AutoSizer>
         ) : (
-          <div className="w-full h-full grid items-center justify-center">
+          <div className="w-full h-full grid items-center justify-center bg-background border-t">
             <div className="flex items-center space-x-2">
               <Search size={18} className="text-muted-foreground" />
               <p className="text-center text-sm text-muted-foreground">
