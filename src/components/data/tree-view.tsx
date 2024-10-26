@@ -68,7 +68,6 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
       ref={virtualListRef as React.RefObject<VirtuosoHandle>}
       totalCount={flattenedData.length}
       itemContent={rowRenderer}
-      className="border-t"
       followOutput={followOutput}
       isScrolling={(scrolling) => setIsScrolling(scrolling)}
       overscan={300}

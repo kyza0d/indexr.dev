@@ -131,7 +131,6 @@ export const GridView: React.FC<GridViewProps> = ({ data }) => {
       totalCount={rowCount}
       overscan={200}
       components={components}
-      className="border-t"
       fixedHeaderContent={renderHeader}
       itemContent={renderRow}
     />

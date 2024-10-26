@@ -29,7 +29,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, isSmallSc
 
 
   return (
-    <div className={cn(`relative inline-block mx-2 mt-2 ${isSmallScreen ? 'w-[200px]' : 'w-full'}`, className)}>
+    <div className={cn(`relative inline-block mt-2 ${isSmallScreen ? 'w-[200px]' : 'w-full'}`, className)}>
       <Search size={20} className="absolute left-3 top-4 text-muted-foreground" />
       <Input
         type="text"

@@ -17,7 +17,7 @@ export default async function ExplorePage({ params }: ExplorePageProps) {
   }
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto px-4">
       <Suspense fallback={<DataExplorerSkeleton />}>
         <DataExplorer initialDataset={dataset} />
       </Suspense>

@@ -31,6 +31,7 @@ function flattenIndexItems(items: IndexItem[]): IndexItem[] {
 const FUSE_THRESHOLD = 1000; // Adjust this value based on your performance tests
 
 export function createSearchFunction(data: IndexItem[]) {
+
   // Ensure data is an array
   if (!Array.isArray(data)) {
     console.error('Expected an array of IndexItem for search function, but received:', data);
@@ -54,6 +55,7 @@ export function createSearchFunction(data: IndexItem[]) {
       return results.map((result) => result.item);
     };
   } else {
+
     // Use a simple string matching for larger datasets
     return function search(term: string): IndexItem[] {
       if (!term.trim()) return [];

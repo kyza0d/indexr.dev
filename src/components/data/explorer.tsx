@@ -15,13 +15,14 @@ import {
   FileSpreadsheet,
   FileJson2,
 } from 'lucide-react'
+
 import { Virtuoso } from 'react-virtuoso'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { useMediaQuery } from 'react-responsive'
 
 import { TreeView } from '@/components/data/tree-view'
-import GridView from '@/components/data/grid-view'
+import { GridView } from '@/components/data/grid-view'
 import { SearchBar } from '@/components/search/search-bar'
 import { SearchResult } from '@/components/search/search-result'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -41,6 +42,7 @@ import {
   SheetTrigger,
   SheetContent,
 } from '@/components/ui/sheet'
+import { Badge } from '../ui/badge'
 
 interface DataExplorerProps {
   initialDataset: Dataset
@@ -128,7 +130,7 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
   return (
     <TreeProvider currentView={currentView}>
       <GridProvider currentView={currentView}>
-        <div className="flex flex-col h-[96vh]">
+        <div className="flex flex-col h-[98vh]">
           <PanelGroup
             direction={isSmallScreen ? 'vertical' : 'horizontal'}
             className="flex-grow relative border rounded-md bg-primary/70"
@@ -153,7 +155,6 @@ export function DataExplorer({ initialDataset }: DataExplorerProps) {
                 </Panel>
 
                 {searchTerm && (
-
                   <>
                     <PanelResizeHandle className="bg-neutral-700 h-[1px] mt-2 cursor-col-resize " />
                     <Panel defaultSize={40} minSize={20}>
@@ -259,23 +260,27 @@ function DatasetHeader({
   return (
     <div className={`absolute right-2`}>
       <div
-        className={`flex items-center ${isSmallScreen ? 'justify-between' : 'justify-end'
-          } space-x-2`}
+        className={`relative flex items-center space-x-2 ${isSmallScreen ? 'justify-between' : 'justify-end'
+          }`}
       >
+
         {!isSmallScreen && (
           <div className="flex items-center space-x-2">
             {isOwner && <span className="text-blue-500">Owner</span>}
           </div>
         )}
+
         <SearchBar
           value={searchTerm}
           onChange={onSearch}
+          className="z-10 w-96"
           isSmallScreen={isSmallScreen}
         />
+
         {searchResults.length > 0 && (
-          <div className="absolute text-sm text-muted-foreground p-2 px-4">
+          <Badge variant="outline" className="absolute top-4 right-3 text-sm p-2 h-8 z-10">
             {searchResults.length} / {totalItems}
-          </div>
+          </Badge>
         )}
       </div>
     </div>
@@ -324,11 +329,13 @@ function DataTabs({
           )}
           {dataset.name.split('.').pop() || 'Dataset'}
         </Button>
+
         <TabsList className='absolute'>
           <TabsTrigger value="tree">
             <FolderSearch size={16} className="mr-2" />
             Tree View
           </TabsTrigger>
+
           {dataset.fileType !== 'application/json' && (
             <TabsTrigger value="grid">
               <Table size={16} className="mr-2" />
@@ -336,6 +343,7 @@ function DataTabs({
             </TabsTrigger>
           )}
         </TabsList>
+
         {!isOwner && dataset.isPublic && (
           <SaveDatasetButton
             datasetId={dataset.id}
@@ -469,7 +477,7 @@ function SearchResultsPanel({
           <AutoSizer>
             {({ width }) => (
               <Virtuoso
-                style={{ width, height: '96vh', padding: '0 0.5rem' }}
+                style={{ width, height: '98vh', padding: '0 0.5rem' }}
                 className="bg-background border-t"
                 overscan={200}
                 totalCount={searchResults.length}

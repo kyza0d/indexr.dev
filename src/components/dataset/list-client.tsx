@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pagination } from '@/components/ui/pagination'
 import { DatasetCard } from '@/components/dataset/dataset-card'
@@ -11,8 +10,7 @@ import { useSession } from 'next-auth/react'
 import { DatasetListSkeleton } from './list-skeleton'
 
 export function DatasetListClient({ minimal }: { minimal?: boolean }) {
-  const router = useRouter()
-  const { query, tags, datasets, filteredDatasets, setDatasets } = useDatasetSearch()
+  const { query, tags, filteredDatasets, setDatasets } = useDatasetSearch()
   const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const { data: session } = useSession()
