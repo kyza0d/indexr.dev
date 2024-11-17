@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { normalizeData } from '@/lib/data-processing';
-import { Readable } from 'stream';
-import { pipeline } from 'stream/promises';
+import { normalize } from '@/data/lib/normalize';
 import cache from '@/lib/cache';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -13,7 +11,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('pageSize') || '1000', 10);
 
-    // Implement caching
     const cacheKey = `dataset:${id}:${raw}:${page}:${pageSize}`;
     const cachedData = cache.get(cacheKey);
 
@@ -71,9 +68,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       });
     } else {
       const fileContent = await response.text();
-      const normalizedData = await normalizeData(fileContent, dataset.fileType);
+      const normalizedData = await normalize(fileContent, dataset.fileType);
 
-      // Implement pagination
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedData = normalizedData.slice(startIndex, endIndex);

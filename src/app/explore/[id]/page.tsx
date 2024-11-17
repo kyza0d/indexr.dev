@@ -1,26 +1,21 @@
-import { Suspense } from 'react'
-import { DataExplorer } from '@/components/data/explorer'
-import { DataExplorerSkeleton } from '@/components/data/explorer-skeleton'
-import { getDatasetById } from '@/lib/datasets'
-import { notFound } from 'next/navigation'
+import { Suspense } from 'react';
+import { getDatasetById } from '@/lib/datasets';
+
+import { Explorer } from '@/components/explorer';
+import { ExplorerProvider } from '@/explorer/provider';
 
 interface ExplorePageProps {
-  params: { id: string }
+  params: { id: string };
 }
 
-export default async function ExplorePage({ params }: ExplorePageProps) {
-  const { id } = params
-
-  const dataset = await getDatasetById(id)
-  if (!dataset) {
-    notFound()
-  }
+export default async function Explore({ params }: ExplorePageProps) {
+  const dataset = await getDatasetById(params.id);
 
   return (
-    <div className="mx-auto px-4">
-      <Suspense fallback={<DataExplorerSkeleton />}>
-        <DataExplorer initialDataset={dataset} />
-      </Suspense>
-    </div>
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <ExplorerProvider dataset_id={dataset}>
+        <Explorer />
+      </ExplorerProvider>
+    </Suspense>
+  );
 }

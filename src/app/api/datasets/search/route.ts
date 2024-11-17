@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import { auth } from '@/auth'; // Import your authentication function
 
 export async function GET(req: NextRequest) {
-  // Get the current user's session
   const session = await auth();
   const userId = session?.user?.id || null;
 
@@ -17,10 +16,8 @@ export async function GET(req: NextRequest) {
   try {
     const skip = (page - 1) * pageSize;
 
-    // Build the 'where' conditions
     const whereConditions: Prisma.DatasetWhereInput[] = [];
 
-    // Visibility filter: include public datasets and user's own datasets
     if (userId) {
       whereConditions.push({
         OR: [
@@ -34,7 +31,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Search query filter
     if (query) {
       whereConditions.push({
         OR: [
@@ -54,7 +50,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Tags filter - ensure ALL requested tags are present
     if (tags.length > 0) {
       whereConditions.push({
         AND: tags.map(tag => ({
@@ -70,7 +65,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Combine all conditions
     const where: Prisma.DatasetWhereInput = {
       AND: whereConditions,
     };

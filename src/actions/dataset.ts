@@ -107,30 +107,73 @@ export async function fetchDatasets() {
   }
 }
 
-export async function saveDataset(id: string, isSaved: boolean) {
+export async function saveDataset(id: string, shouldSave: boolean) {
   try {
-    const user = await getAuthenticatedUser()
-
-    if (!user?.id) {
-      throw new Error('User is not authenticated or missing userId');
+    const session = await auth()
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' }
     }
 
-    if (isSaved) {
-      await prisma.savedDataset.create({
-        data: { userId: user.id, datasetId: id },  // user.id is guaranteed to be string now
+    if (shouldSave) {
+      await prisma.savedDataset.upsert({
+        where: {
+          userId_datasetId: {
+            userId: session.user.id,
+            datasetId: id,
+          },
+        },
+        create: {
+          userId: session.user.id,
+          datasetId: id,
+        },
+        update: {},
       })
     } else {
       await prisma.savedDataset.delete({
-        where: { userId_datasetId: { userId: user.id, datasetId: id } },
+        where: {
+          userId_datasetId: {
+            userId: session.user.id,
+            datasetId: id,
+          },
+        },
       })
     }
 
-    invalidateCache()
+    // Revalidate relevant paths
+    revalidatePath(`/explore/${id}`)
     revalidatePath('/datasets')
+
     return { success: true }
   } catch (error) {
-    console.error('Error saving/unsaving dataset:', error)
-    return { success: false, error: 'Failed to save/unsave dataset' }
+    console.error('Error saving dataset:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to save dataset'
+    }
+  }
+}
+
+export async function getDatasetSavedStatus(id: string) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return { isSaved: false }
+    }
+
+    const savedDataset = await prisma.savedDataset.findUnique({
+      where: {
+        userId_datasetId: {
+          userId: session.user.id,
+          datasetId: id,
+        },
+      },
+      select: { id: true },
+    })
+
+    return { isSaved: !!savedDataset }
+  } catch (error) {
+    console.error('Error checking saved status:', error)
+    return { isSaved: false }
   }
 }
 
@@ -178,6 +221,8 @@ export async function fetchUserDatasets(): Promise<{ datasets: Dataset[], error:
     return { datasets: [], error: 'Failed to fetch datasets' }
   }
 }
+
+
 
 function invalidateCache() {
   cache.del(CACHE_KEY_DATASETS)

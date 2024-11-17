@@ -1,4 +1,5 @@
-import { InferredType } from '@/lib/type-inference';
+import { InferredType } from '@/data/lib/infer-type';
+import { FuseResultMatch } from 'fuse.js';
 
 export type JsonValue = "object" | "array" | string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -8,8 +9,8 @@ export interface TreeNode {
   data: {
     value: JsonValue;
   };
+  path: { key: string; type: InferredType }[];
   children?: TreeNode[];
-  path: Array<{ key: string; type: InferredType }>;
 }
 
 export interface IndexItem {
@@ -25,21 +26,25 @@ export interface IndexItem {
   flattenedPath?: string;
   originalIndex?: number;
   currentIndex?: number;
+  searchableText?: string;
+  searchContext?: {
+    lineNumber: number;
+    columnNumber: number;
+    parentContext?: string;
+  };
 }
 
 export interface SearchResult {
+  id: string;
+  path: string[];
+  matches: readonly FuseResultMatch[]; // Updated to readonly
+  score: number;
   item: IndexItem;
-  matches: Array<{
-    key: string;
-    value: string;
-    indices: Array<[number, number]>;
-    rowIndex: number;
-    columnIndex: number;
-  }>;
-}
-
-export interface GridItem {
-  [key: string]: string | number | boolean | null;
+  originalIndex?: number;
+  context?: {
+    before: string[];
+    after: string[];
+  };
 }
 
 export interface Dataset {
@@ -60,13 +65,6 @@ export interface Dataset {
   data?: any;
   getData?: () => any;
   rawData?: string;
-}
-
-export interface ExampleDataset {
-  id: string
-  name: string
-  description: string
-  fileType: FileType
 }
 
 export type FileType = 'application/json' | 'text/csv' | string;

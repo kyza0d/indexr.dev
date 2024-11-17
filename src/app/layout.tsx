@@ -1,13 +1,16 @@
 import { DM_Sans, DM_Mono } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from "@/components/layout/theme-provider"
+
+import { ThemeProvider } from "@/layout/theme/provider"
 import { Toaster } from "@/components/ui/toaster"
-import RootLayoutClient from '@/components/layout/layout.client'
+
+import { App } from '@/layout/app'
 import { SessionProvider } from "next-auth/react"
+
+import './globals.css'
 
 const font_sans = DM_Sans({
   subsets: ['latin-ext'],
-  weight: ['500', '600'],
+  weight: ['400', '500', '600'],
   variable: '--font-sans',
 })
 
@@ -32,9 +35,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <RootLayoutClient>
+            <App>
               {children}
-            </RootLayoutClient>
+            </App>
             <Toaster />
           </ThemeProvider>
         </SessionProvider>

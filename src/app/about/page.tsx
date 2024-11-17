@@ -2,8 +2,7 @@
 
 import React from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { FileJson, Search, Users, Lock, Zap } from 'lucide-react'
+import { FileJson, Search, Users, Lock } from 'lucide-react'
 
 export default function AboutPage() {
   return (
@@ -30,22 +29,22 @@ export default function AboutPage() {
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <FeatureCard
-          icon={<FileJson className="h-8 w-8 text-primary" />}
+          icon={<FileJson className="h-8 w-8 text-primary-foreground" />}
           title="JSON and CSV Support"
           description="Upload and explore both JSON and CSV file formats with ease."
         />
         <FeatureCard
-          icon={<Search className="h-8 w-8 text-primary" />}
+          icon={<Search className="h-8 w-8 text-primary-foreground" />}
           title="Advanced Search"
           description="Powerful search functionality to quickly find specific data points."
         />
         <FeatureCard
-          icon={<Users className="h-8 w-8 text-primary" />}
+          icon={<Users className="h-8 w-8 text-primary-foreground" />}
           title="Collaboration"
           description="Share datasets with team members and collaborate on data analysis."
         />
         <FeatureCard
-          icon={<Lock className="h-8 w-8 text-primary" />}
+          icon={<Lock className="h-8 w-8 text-primary-foreground" />}
           title="Privacy Controls"
           description="Set datasets as public or private to control access."
         />

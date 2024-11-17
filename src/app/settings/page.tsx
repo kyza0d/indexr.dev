@@ -6,14 +6,12 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
 import { Loader2, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface UserSettings {
-  theme: 'light' | 'dark' | 'system'
   autoTag: boolean
   publicByDefault: boolean
 }
@@ -25,7 +23,6 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [settings, setSettings] = useState<UserSettings>({
-    theme: 'system',
     autoTag: true,
     publicByDefault: false,
   })
@@ -112,12 +109,12 @@ export default function SettingsPage() {
   }
 
   if (status === 'unauthenticated') {
-    router.push('/auth/signin')
+    router.push('/auth/sign-in')
     return null
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container h-[97vh] mx-auto">
       {error && (
         <div className="bg-destructive text-destructive-foreground p-4 rounded-md mb-6">
           {error}
@@ -141,23 +138,6 @@ export default function SettingsPage() {
                 <h2 className="text-2xl font-bold">{session?.user?.name}</h2>
                 <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="theme">Theme</Label>
-              <Select
-                name="theme"
-                value={settings.theme}
-                onValueChange={(value) => handleChange("theme", value as 'light' | 'dark' | 'system')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="autoTag">Auto-tag datasets</Label>

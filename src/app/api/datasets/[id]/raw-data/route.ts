@@ -6,19 +6,13 @@ const CHUNK_SIZE = 1000;
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Optional authentication
     let session = null;
     try {
       session = await auth();
-    } catch (error) {
-      // User is not authenticated; proceed without session
-    }
+    } catch (error) { }
 
     const userId = session?.user?.id || null;
     const { id } = params;
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const search = searchParams.get('search') || '';
 
     const dataset = await prisma.dataset.findUnique({
       where: { id },
@@ -30,24 +24,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
 
     if (!dataset) {
-      console.log('Dataset not found for id:', id);
       return NextResponse.json({ error: 'Dataset not found' }, { status: 404 });
     }
 
-    // Authorization Logic
     if (!dataset.isPublic) {
       if (!userId || userId !== dataset.userId) {
-        console.log('Unauthorized access attempt to private dataset');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
 
     if (!dataset.fileUrl) {
-      console.log('Dataset file URL is missing for id:', id);
       return NextResponse.json({ error: 'Dataset file URL is missing' }, { status: 500 });
     }
 
-    console.log('Fetching file content from URL:', dataset.fileUrl);
     const fileResponse = await fetch(dataset.fileUrl);
     if (!fileResponse.ok) {
       throw new Error(`Failed to fetch file: ${fileResponse.statusText}`);
@@ -55,6 +44,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const fileContent = await fileResponse.text();
 
     const lines = fileContent.split('\n');
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const search = searchParams.get('search') || '';
+
     let lineCount = 0;
     let dataChunk: string[] = [];
     let totalRows = lines.length;
@@ -77,7 +71,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const hasMore = lineCount > page * CHUNK_SIZE;
 
-    console.log('Successfully processed dataset. Rows:', totalRows, 'File size:', fileSize);
     return NextResponse.json({
       data: dataChunk,
       hasMore,
@@ -87,7 +80,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     });
   } catch (error) {
-    console.error('Error in raw-data route:', error);
     return NextResponse.json(
       { error: 'Error fetching raw dataset: ' + (error as Error).message },
       { status: 500 }
