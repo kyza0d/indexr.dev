@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 import { z } from 'zod';
 
 const UploadSchema = z.object({
@@ -18,7 +18,7 @@ const UploadSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session || !session.user || !session.user.id) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -52,25 +52,48 @@ export async function POST(req: NextRequest) {
       access: 'public',
     });
 
-    const dataset = await prisma.dataset.create({
-      data: {
-        name: validatedData.name,
-        description: validatedData.description,
-        fileType: validatedData.file.type,
-        fileUrl: blob.url,
-        isPublic: validatedData.isPublic,
-        userId: session.user.id, // This is now guaranteed to be defined
-        tags: {
-          connectOrCreate: validatedData.tags.map(tag => ({
-            where: { name: tag },
-            create: { name: tag },
-          })),
+    // Use a transaction to ensure data consistency
+    const dataset = await db.getPrisma().$transaction(async (tx) => {
+      // Create or connect tags
+      const tagConnections = await Promise.all(
+        validatedData.tags.map(async (tagName) => {
+          const tag = await tx.tag.upsert({
+            where: { name: tagName },
+            create: { name: tagName },
+            update: {},
+          });
+          return tag;
+        })
+      );
+
+      // Create the dataset
+      return tx.dataset.create({
+        data: {
+          name: validatedData.name,
+          description: validatedData.description,
+          fileType: validatedData.file.type,
+          fileUrl: blob.url,
+          isPublic: validatedData.isPublic,
+          userId: session.user.id,
+          tags: {
+            connect: tagConnections.map(tag => ({ id: tag.id })),
+          },
         },
-      },
-      include: {
-        tags: true,
-      },
+        include: {
+          tags: true,
+        },
+      });
     });
+
+    // Clear relevant caches
+    db.clearCache(`user-${session.user.id}-recent`);
+    db.clearLoader('dataset');
+
+    // Clear any cached dataset lists
+    const cacheKeys = await db.cache.keys();
+    cacheKeys
+      .filter(key => key.startsWith('recent-datasets-') || key.startsWith('datasets-list-'))
+      .forEach(key => db.clearCache(key));
 
     return NextResponse.json({ success: true, dataset });
   } catch (error) {

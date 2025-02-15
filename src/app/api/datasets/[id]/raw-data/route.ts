@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma';
 
 const CHUNK_SIZE = 1000;
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     let session = null;
     try {

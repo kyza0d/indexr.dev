@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${font_sans.variable} ${font_mono.variable}`}>
+    <html lang="en" className={`${font_sans.variable} ${font_mono.variable}`} suppressHydrationWarning>
       <body className="font-sans">
         <SessionProvider>
           <ThemeProvider

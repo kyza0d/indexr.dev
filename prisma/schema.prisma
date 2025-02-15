@@ -5,8 +5,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Dataset {
@@ -24,6 +24,13 @@ model Dataset {
   itemCount   Int      @default(0)
   views       DatasetView[] @relation("DatasetToView")
   savedBy     SavedDataset[] @relation("DatasetToSavedDataset")
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([createdAt])
+  @@index([updatedAt])
+  // Composite index for common queries
+  @@index([userId, isPublic, updatedAt])
 }
 
 model DatasetView {
@@ -35,12 +42,15 @@ model DatasetView {
   user      User?    @relation(fields: [userId], references: [id])
 
   @@index([datasetId, userId])
+  @@index([userId, viewedAt])
 }
 
 model Tag {
   id       String    @id @default(cuid())
   name     String    @unique
   datasets Dataset[]
+
+  @@index([name])
 }
 
 model User {
@@ -56,7 +66,6 @@ model User {
   datasetViews  DatasetView[]
   savedDatasets SavedDataset[]
 
-  // New user settings fields
   theme           String    @default("system")
   autoTag         Boolean   @default(true)
   publicByDefault Boolean   @default(false)
@@ -64,6 +73,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([email])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -71,14 +82,14 @@ model SavedDataset {
   id        String   @id @default(cuid())
   dataset   Dataset  @relation("DatasetToSavedDataset", fields: [datasetId], references: [id], onDelete: Cascade)
   datasetId String
-
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, datasetId])
+  @@index([userId, createdAt])
+  @@index([datasetId])
 }
 
 model Account {
@@ -100,6 +111,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -112,6 +124,7 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
   @@map("sessions")
 }
 

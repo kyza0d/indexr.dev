@@ -32,7 +32,7 @@ export interface GridIndexItem {
 
 
 export interface GridContextType {
-  virtualListRef: React.RefObject<TableVirtuosoHandle>;
+  virtualListRef: React.RefObject<TableVirtuosoHandle | null>;
   currentView: 'tree' | 'grid';
   scrollToRow: (rowIndex: number) => void;
   activeRowIndex: number | null;

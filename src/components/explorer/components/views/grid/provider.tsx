@@ -3,7 +3,7 @@ import { TableVirtuosoHandle } from 'react-virtuoso';
 import { GridIndexItem, GridDataItem } from '@/grid/types';
 
 interface GridContextType {
-  virtualListRef: React.RefObject<TableVirtuosoHandle>;
+  virtualListRef: React.RefObject<TableVirtuosoHandle | null>;
   currentView: 'tree' | 'grid';
   scrollToRow: (rowIndex: number) => void; // Accepts index in sorted data
   activeRowIndex: number | null;

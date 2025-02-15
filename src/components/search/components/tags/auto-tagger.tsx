@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useGenerateTags } from './use-generate-tags';
 

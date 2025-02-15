@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { normalize } from '@/data/lib/normalize';
 import cache from '@/lib/cache';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const { id } = params;
     const { searchParams } = new URL(req.url);

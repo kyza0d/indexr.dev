@@ -5,10 +5,11 @@ import { Explorer } from '@/components/explorer';
 import { ExplorerProvider } from '@/explorer/provider';
 
 interface ExplorePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default async function Explore({ params }: ExplorePageProps) {
+export default async function Explore(props: ExplorePageProps) {
+  const params = await props.params;
   const dataset = await getDatasetById(params.id);
 
   return (

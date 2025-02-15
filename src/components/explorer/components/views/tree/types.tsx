@@ -34,7 +34,7 @@ export interface TreeContextType {
   setHighlightedNode: (nodeId: string | null) => void;
   isScrolling: boolean;
   setIsScrolling: (isScrolling: boolean) => void;
-  virtualListRef: React.RefObject<VirtuosoHandle>;
+  virtualListRef: React.RefObject<VirtuosoHandle | null>;
   currentView: 'tree' | 'grid';
   nodeIndexMap: Map<string, number>;
   expandAndScrollToNode: (nodePath: string[]) => void;

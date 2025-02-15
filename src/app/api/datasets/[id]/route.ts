@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
-import { deleteDataset } from '@/actions/dataset';
+import { db } from '@/lib/prisma';
+import { getDatasetById, recordDatasetView } from '@/lib/datasets';
 import { cache } from 'react';
+import { Session } from 'next-auth';
+import { PrismaClient } from '@prisma/client';
 
+// Add type predicate for session
+function isAuthenticatedSession(session: Session | null): session is Session & { user: { id: string } } {
+  return !!session?.user?.id;
+}
+
+// Cache individual dataset lookups
 const getCachedDataset = cache(async (id: string) => {
-  return await prisma.dataset.findUnique({
-    where: { id },
-    include: {
-      tags: { select: { id: true, name: true } },
-      user: { select: { id: true, name: true, image: true } },
-      savedBy: { select: { userId: true } },
-    },
-  });
+  return await getDatasetById(id);
 });
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await auth();
-    const userId = session?.user?.id;
+    const userId = isAuthenticatedSession(session) ? session.user.id : null;
     const { id } = params;
 
     const dataset = await getCachedDataset(id);
@@ -31,27 +33,12 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const isSaved = userId ? dataset.savedBy.some((saved) => saved.userId === userId) : false;
+    // Record view asynchronously - don't wait for it
+    if (userId) {
+      recordDatasetView(dataset.id, userId).catch(console.error);
+    }
 
-    return NextResponse.json({
-      id: dataset.id,
-      name: dataset.name,
-      description: dataset.description,
-      fileType: dataset.fileType,
-      fileUrl: dataset.fileUrl,
-      isPublic: dataset.isPublic,
-      isSaved,
-      userId: dataset.user.id,
-      userName: dataset.user.name || '',
-      createdAt: dataset.createdAt.toISOString(),
-      updatedAt: dataset.updatedAt.toISOString(),
-      itemCount: dataset.itemCount,
-      tags: dataset.tags.map((tag) => ({ id: tag.id, name: tag.name })),
-      user: {
-        name: dataset.user.name,
-        image: dataset.user.image,
-      },
-    }, {
+    return NextResponse.json(dataset, {
       headers: {
         'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',
       },
@@ -68,30 +55,39 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  console.log('Entering DELETE function for dataset');
+export async function DELETE(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+
   try {
     const session = await auth();
-    console.log('Auth session:', session ? 'exists' : 'does not exist');
 
-    if (!session) {
-      console.log('Unauthorized access attempt');
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const { id } = params;
-    console.log('Dataset ID to delete:', id);
+    const dataset = await db.getDataset(id);
 
-    console.log('Attempting to delete dataset');
-    const result = await deleteDataset(id);
-
-    if (result.success) {
-      console.log('Dataset deleted successfully');
-      return NextResponse.json({ message: 'Dataset deleted successfully' });
-    } else {
-      console.error('Failed to delete dataset:', result.error);
-      return NextResponse.json({ error: result.error }, { status: 400 });
+    if (!dataset) {
+      return NextResponse.json({ error: 'Dataset not found' }, { status: 404 });
     }
+
+    if (dataset.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Use transaction with proper typing
+    await db.transaction(async (tx: PrismaClient) => {
+      await tx.datasetView.deleteMany({ where: { datasetId: id } });
+      await tx.savedDataset.deleteMany({ where: { datasetId: id } });
+      await tx.dataset.delete({ where: { id } });
+    });
+
+    // Clear caches after successful deletion
+    db.clearCache(`dataset-${id}`);
+    db.clearLoader('dataset');
+
+    return NextResponse.json({ message: 'Dataset deleted successfully' });
   } catch (error) {
     console.error('Error in dataset deletion route:', error);
     return NextResponse.json({

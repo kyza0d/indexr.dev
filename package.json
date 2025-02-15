@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "vercel-build": "prisma generate && next build",
     "start": "next start",
@@ -55,6 +55,7 @@
     "@vercel/blob": "^0.23.4",
     "ai": "3.4.33",
     "app": "link:@/app",
+    "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
@@ -62,6 +63,7 @@
     "components": "link:@/components",
     "csv": "link:@codemirror/legacy-modes/mode/csv",
     "csv-parse": "^5.5.6",
+    "dataloader": "^2.2.3",
     "date-fns": "^3.6.0",
     "emblor": "^1.4.6",
     "formidable": "^3.5.1",
@@ -71,17 +73,17 @@
     "lucide-react": "^0.438.0",
     "monaco-editor": "^0.52.0",
     "nanoid": "^5.0.7",
-    "next": "14.2.7",
-    "next-auth": "5.0.0-beta.20",
+    "next": "15.1.7",
+    "next-auth": "5.0.0-beta.25",
     "next-themes": "^0.3.0",
     "node-cache": "^5.1.2",
     "openai": "4.58.2",
     "papaparse": "^5.3.0",
     "prisma": "^5.19.1",
     "rc-scrollbars": "^1.1.6",
-    "react": "^18",
+    "react": "19.0.0",
     "react-custom-scrollbars-2": "^4.5.0",
-    "react-dom": "^18",
+    "react-dom": "19.0.0",
     "react-dropzone": "^11.3.4",
     "react-hook-form": "^7.53.0",
     "react-hotkeys": "^2.0.0",
@@ -112,12 +114,18 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "19.0.8",
+    "@types/react-dom": "19.0.3",
     "eslint": "^8",
-    "eslint-config-next": "14.2.7",
+    "eslint-config-next": "15.1.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.8",
+      "@types/react-dom": "19.0.3"
+    }
   }
 }

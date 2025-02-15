@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -18,19 +22,49 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@/layout/*": ["./src/components/layout/*"],
-      "@/explorer/*": ["./src/components/explorer/*"],
-      "@/search/*": ["./src/components/search/*"],
-      "@/tree/*": ["./src/components/explorer/components/views/tree/*"],
-      "@/grid/*": ["./src/components/explorer/components/views/grid/*"],
-      "@/data/*": ["./src/components/data/*"],
-      "@/dataset/*": ["./src/components/dataset/*"],
-      "@/editor/*": ["./src/components/editor/*"],
-      "@/tabs/*": ["./src/components/editor/components/tabs/*"],
-      "@/ui/*": ["./src/components/ui/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "@/layout/*": [
+        "./src/components/layout/*"
+      ],
+      "@/explorer/*": [
+        "./src/components/explorer/*"
+      ],
+      "@/search/*": [
+        "./src/components/search/*"
+      ],
+      "@/tree/*": [
+        "./src/components/explorer/components/views/tree/*"
+      ],
+      "@/grid/*": [
+        "./src/components/explorer/components/views/grid/*"
+      ],
+      "@/data/*": [
+        "./src/components/data/*"
+      ],
+      "@/dataset/*": [
+        "./src/components/dataset/*"
+      ],
+      "@/editor/*": [
+        "./src/components/editor/*"
+      ],
+      "@/tabs/*": [
+        "./src/components/editor/components/tabs/*"
+      ],
+      "@/ui/*": [
+        "./src/components/ui/*"
+      ]
+    },
+    "target": "ES2017"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

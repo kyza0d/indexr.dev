@@ -6,7 +6,8 @@ export async function GET(request: Request) {
   const query = searchParams.get('query')
 
   try {
-    let tags;
+    type Tag = { id: string; name: string };
+    let tags: Tag[];
     if (query) {
       tags = await prisma.tag.findMany({
         where: {
