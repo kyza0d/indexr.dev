@@ -25,6 +25,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+pnpm-lock.yaml
+
 # local env files
 .env*.local
 .env
@@ -36,5 +38,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# AI
-project_utils/
+
